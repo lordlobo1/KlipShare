@@ -1,0 +1,16 @@
+# Credenciais — nunca versionar
+config/credentials.conf
+config/*.conf
+
+# Cache gerado em tempo de execução
+cache/
+
+# Menu gerado dinamicamente (sobrescrito pelo Kindle)
+menu.json
+
+# Arquivos temporários do Windows
+Thumbs.db
+desktop.ini
+
+# Arquivos temporários do macOS
+.DS_Store
