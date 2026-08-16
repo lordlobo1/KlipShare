@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KlipShare — Configuração</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f0f;
+            color: #e8e8e8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .container { max-width: 520px; width: 100%; }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+        .logo h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+        .logo p  { color: #666; font-size: 13px; margin-top: 6px; }
+
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #272727;
+            border-radius: 14px;
+            padding: 32px;
+        }
+
+        .step-title { font-size: 17px; font-weight: 600; margin-bottom: 10px; }
+        .step-desc  { color: #888; font-size: 14px; line-height: 1.65; margin-bottom: 24px; }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 9px;
+            padding: 13px 24px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            width: 100%;
+            border: 1px solid #333;
+            background: #222;
+            color: #e8e8e8;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .btn:hover { background: #2a2a2a; border-color: #444; }
+
+        .btn-primary { background: #fff; color: #000; border-color: #fff; }
+        .btn-primary:hover { background: #e8e8e8; }
+
+        .loading { text-align: center; padding: 40px 0; }
+        .spinner {
+            width: 30px; height: 30px;
+            border: 3px solid #2a2a2a;
+            border-top-color: #e8e8e8;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+            margin: 0 auto 14px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-box {
+            background: #1f0e0e;
+            border: 1px solid #4a1c1c;
+            border-radius: 9px;
+            padding: 16px;
+            color: #f08080;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .success-check {
+            font-size: 38px;
+            text-align: center;
+            margin-bottom: 14px;
+        }
+
+        .code-block {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #7ecf7e;
+            white-space: pre;
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        .copy-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 7px;
+            border: 1px solid #333;
+            background: #222;
+            color: #aaa;
+            font-size: 13px;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .copy-btn:hover { background: #2a2a2a; }
+        .copy-btn.copied { color: #6bcb77; border-color: #6bcb77; }
+
+        .next-steps {
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 1px solid #222;
+        }
+        .next-steps h3 {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #555;
+            margin-bottom: 14px;
+        }
+        .next-steps ol {
+            padding-left: 18px;
+            color: #777;
+            font-size: 13px;
+            line-height: 2.1;
+        }
+        .next-steps ol li strong { color: #ccc; }
+        .next-steps code {
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="logo">
+        <h1>KlipShare</h1>
+        <p>Destaques do Kindle direto para o Threads</p>
+    </div>
+
+    <div class="card">
+
+        <!-- Estado: Inicial -->
+        <div id="state-initial">
+            <div class="step-title">Conectar sua conta do Threads</div>
+            <div class="step-desc">
+                Clique no botão abaixo para autorizar o KlipShare a publicar destaques em seu nome no Threads.
+                Você será redirecionado para a tela oficial de autorização do Threads e voltará aqui automaticamente.
+            </div>
+            <a id="auth-btn" href="#" class="btn btn-primary">Autorizar com Threads</a>
+        </div>
+
+        <!-- Estado: Carregando -->
+        <div id="state-loading" class="hidden">
+            <div class="loading">
+                <div class="spinner"></div>
+                <div style="color:#666; font-size:14px;">Obtendo suas credenciais...</div>
+            </div>
+        </div>
+
+        <!-- Estado: Erro -->
+        <div id="state-error" class="hidden">
+            <div class="error-box" id="error-text"></div>
+            <a id="retry-btn" href="#" class="btn">Tentar novamente</a>
+        </div>
+
+        <!-- Estado: Sucesso -->
+        <div id="state-success" class="hidden">
+            <div class="success-check">✓</div>
+            <div class="step-title" style="text-align:center">Credenciais geradas</div>
+            <div class="step-desc" style="text-align:center; margin-bottom:0">
+                Copie o conteúdo abaixo e salve no arquivo
+                <code style="background:#222;border:1px solid #333;border-radius:4px;padding:1px 5px;font-size:12px;color:#aaa">credentials.conf</code>
+                do seu Kindle.
+            </div>
+
+            <div class="code-block" id="cred-content"></div>
+            <button class="copy-btn" id="copy-btn" onclick="copyCredentials()">Copiar</button>
+
+            <div class="next-steps">
+                <h3>Próximos passos</h3>
+                <ol>
+                    <li>No Kindle, crie a pasta <strong>extensions/klipshare/<code>config/</code></strong></li>
+                    <li>Crie o arquivo <strong><code>credentials.conf</code></strong> e cole o conteúdo copiado</li>
+                    <li>Ejete o Kindle com segurança</li>
+                    <li>Abra o <strong>KUAL → KlipShare → Atualizar lista</strong></li>
+                    <li>Selecione qualquer destaque para publicar no Threads</li>
+                </ol>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const APP_ID = '27888721924156180';
+
+    function getRedirectUri() {
+        return window.location.origin + window.location.pathname.replace(/\/+$/, '');
+    }
+
+    function setState(name) {
+        ['initial', 'loading', 'error', 'success'].forEach(function(s) {
+            document.getElementById('state-' + s).classList.toggle('hidden', s !== name);
+        });
+    }
+
+    var redirectUri = getRedirectUri();
+    var oauthUrl = 'https://threads.net/oauth/authorize'
+        + '?client_id=' + APP_ID
+        + '&redirect_uri=' + encodeURIComponent(redirectUri)
+        + '&scope=threads_basic,threads_content_publish'
+        + '&response_type=code';
+
+    document.getElementById('auth-btn').href = oauthUrl;
+    document.getElementById('retry-btn').href = oauthUrl;
+
+    // Detecta retorno do OAuth com ?code=
+    var params = new URLSearchParams(window.location.search);
+    var code   = params.get('code');
+
+    if (code) {
+        setState('loading');
+        history.replaceState({}, '', window.location.pathname);
+
+        fetch('/api/exchange?code=' + encodeURIComponent(code) + '&redirect_uri=' + encodeURIComponent(redirectUri))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.error) {
+                    document.getElementById('error-text').textContent = 'Erro: ' + data.error;
+                    setState('error');
+                    return;
+                }
+                var content = 'THREADS_USER_ID="' + data.user_id + '"\n'
+                            + 'THREADS_ACCESS_TOKEN="' + data.access_token + '"';
+                document.getElementById('cred-content').textContent = content;
+                setState('success');
+            })
+            .catch(function() {
+                document.getElementById('error-text').textContent =
+                    'Erro de conexão ao obter as credenciais. Verifique sua internet e tente novamente.';
+                setState('error');
+            });
+    }
+
+    function copyCredentials() {
+        var text = document.getElementById('cred-content').textContent;
+        navigator.clipboard.writeText(text).then(function() {
+            var btn = document.getElementById('copy-btn');
+            btn.textContent = 'Copiado!';
+            btn.classList.add('copied');
+            setTimeout(function() {
+                btn.textContent = 'Copiar';
+                btn.classList.remove('copied');
+            }, 2000);
+        });
+    }
+</script>
+</body>
+</html>
