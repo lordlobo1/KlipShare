@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/sh
 #
 # KlipShare - Posta clipping no Threads
 # Recebe o numero do clipping como argumento $1
@@ -37,15 +37,30 @@ fi
 
 . "${CREDS}"
 
+# Remove espaços acidentais nas extremidades
+THREADS_USER_ID=$(printf '%s' "${THREADS_USER_ID}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+THREADS_ACCESS_TOKEN=$(printf '%s' "${THREADS_ACCESS_TOKEN}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
 if [ -z "${THREADS_USER_ID}" ] || [ "${THREADS_USER_ID}" = "SEU_USER_ID_AQUI" ]; then
-    feedback "ERRO: Preencha THREADS_USER_ID em credentials.conf"
+    feedback "ERRO: THREADS_USER_ID ausente em credentials.conf"
     exit 1
 fi
 
+# User ID deve ser numérico
+case "${THREADS_USER_ID}" in
+    *[!0-9]*|"") feedback "ERRO: THREADS_USER_ID invalido (deve ser numerico)"; exit 1 ;;
+esac
+
 if [ -z "${THREADS_ACCESS_TOKEN}" ] || [ "${THREADS_ACCESS_TOKEN}" = "SEU_ACCESS_TOKEN_AQUI" ]; then
-    feedback "ERRO: Preencha THREADS_ACCESS_TOKEN em credentials.conf"
+    feedback "ERRO: THREADS_ACCESS_TOKEN ausente em credentials.conf"
     exit 1
 fi
+
+# Token deve começar com THAA
+case "${THREADS_ACCESS_TOKEN}" in
+    THAA*) ;;
+    *) feedback "ERRO: THREADS_ACCESS_TOKEN invalido. Gere um novo em klipshare.vercel.app/setup"; exit 1 ;;
+esac
 
 ## --- Localiza curl ---
 CURL=""
