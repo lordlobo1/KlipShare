@@ -7,7 +7,11 @@ module.exports = async function handler(req, res) {
 
     const APP_ID     = process.env.THREADS_APP_ID;
     const APP_SECRET = process.env.THREADS_APP_SECRET;
-    const REDIRECT   = redirect_uri || process.env.REDIRECT_URI;
+    const REDIRECT   = process.env.REDIRECT_URI;
+
+    if (redirect_uri && redirect_uri !== REDIRECT) {
+        return res.status(400).json({ error: 'redirect_uri não autorizado' });
+    }
 
     try {
         // 1. Troca código por token de curta duração

@@ -115,29 +115,19 @@ fi
 book=$(printf '%s' "${line}" | cut -f2)
 text=$(printf '%s' "${line}" | cut -f3)
 
-# Capitaliza primeira letra (ASCII e acentuadas)
-text=$(printf '%s' "${text}" | sed \
-    -e 's/^a/A/' -e 's/^b/B/' -e 's/^c/C/' -e 's/^d/D/' -e 's/^e/E/' \
-    -e 's/^f/F/' -e 's/^g/G/' -e 's/^h/H/' -e 's/^i/I/' -e 's/^j/J/' \
-    -e 's/^k/K/' -e 's/^l/L/' -e 's/^m/M/' -e 's/^n/N/' -e 's/^o/O/' \
-    -e 's/^p/P/' -e 's/^q/Q/' -e 's/^r/R/' -e 's/^s/S/' -e 's/^t/T/' \
-    -e 's/^u/U/' -e 's/^v/V/' -e 's/^w/W/' -e 's/^x/X/' -e 's/^y/Y/' \
-    -e 's/^z/Z/' \
-    -e 's/^á/Á/' -e 's/^à/À/' -e 's/^â/Â/' -e 's/^ã/Ã/' \
-    -e 's/^é/É/' -e 's/^è/È/' -e 's/^ê/Ê/' \
-    -e 's/^í/Í/' -e 's/^ì/Ì/' -e 's/^î/Î/' \
-    -e 's/^ó/Ó/' -e 's/^ò/Ò/' -e 's/^ô/Ô/' -e 's/^õ/Õ/' \
-    -e 's/^ú/Ú/' -e 's/^ù/Ù/' -e 's/^û/Û/' \
-    -e 's/^ç/Ç/')
+# Capitaliza primeira letra (multibyte-safe via awk)
+text=$(printf '%s' "${text}" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
 
-# Trunca texto respeitando o limite total de 500 chars do Threads
+# Trunca texto respeitando o limite total de 500 chars do Threads (multibyte-safe)
 # Overhead: aspas (2) + "\n\n— " (4) + "\n\n#kindle #leitura\nCompartilhado via KlipShare para Kindle" (61)
-overhead=$((${#book} + 67))
+book_len=$(printf '%s' "${book}" | awk '{print length}')
+overhead=$((book_len + 67))
 dyn_max=$((500 - overhead))
 [ "${dyn_max}" -gt "${MAX_QUOTE_LEN}" ] && dyn_max="${MAX_QUOTE_LEN}"
 [ "${dyn_max}" -lt 50 ] && dyn_max=50
-if [ "${#text}" -gt "${dyn_max}" ]; then
-    text=$(printf '%s' "${text}" | cut -c1-"${dyn_max}")
+text_len=$(printf '%s' "${text}" | awk '{print length}')
+if [ "${text_len}" -gt "${dyn_max}" ]; then
+    text=$(printf '%s' "${text}" | awk -v n="${dyn_max}" '{printf substr($0,1,n)}')
     text="${text}..."
 fi
 
@@ -193,10 +183,13 @@ auto_refresh_token() {
     new_token=$(printf '%s' "${new_resp}" | grep -o '"access_token":"[^"]*"' | sed 's/"access_token":"//;s/"//')
     if [ -n "${new_token}" ] && [ "${new_token}" != "${THREADS_ACCESS_TOKEN}" ]; then
         tmp="${CREDS}.tmp"
-        grep -v "^THREADS_ACCESS_TOKEN=" "${CREDS}" > "${tmp}"
-        printf 'THREADS_ACCESS_TOKEN="%s"\n' "${new_token}" >> "${tmp}"
-        mv "${tmp}" "${CREDS}"
-        THREADS_ACCESS_TOKEN="${new_token}"
+        if grep -v "^THREADS_ACCESS_TOKEN=" "${CREDS}" > "${tmp}" && \
+           printf 'THREADS_ACCESS_TOKEN="%s"\n' "${new_token}" >> "${tmp}" && \
+           mv "${tmp}" "${CREDS}"; then
+            THREADS_ACCESS_TOKEN="${new_token}"
+        else
+            rm -f "${tmp}"
+        fi
     fi
 }
 
@@ -209,13 +202,13 @@ if ! wifi_ok; then
     exit 0
 fi
 
-## --- Renova token, envia fila pendente e posta ---
+## --- Renova token, posta e drena fila pendente ---
 auto_refresh_token
 feedback "Criando post no Threads..."
-flush_queue
 
 if post_to_threads "${post_text}"; then
     feedback "Postado no Threads com sucesso!"
+    flush_queue 2>/dev/null &
     /mnt/us/extensions/klipshare/bin/generate_menu.sh --quiet 2>/dev/null &
 else
     feedback "FALHA ao publicar. Tente novamente."

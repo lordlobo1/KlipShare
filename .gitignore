@@ -9,13 +9,16 @@ cache/
 menu.json
 
 # Cópias instaladas no root (usadas pelo KUAL localmente — source of truth em kindle/)
-bin/
-config.xml
+/bin/
+/config.xml
 
-# Arquivos de imagem locais
+# Arquivos de imagem locais (exceto screenshots de documentação)
 *.png
 *.jpg
 *.jpeg
+!docs/*.png
+!docs/*.jpg
+!docs/*.jpeg
 
 # Arquivos temporários do Windows
 Thumbs.db

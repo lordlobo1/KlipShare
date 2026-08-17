@@ -1,10 +1,31 @@
 # KlipShare para Kindle
 
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/lordlobo1?label=Apoiar&logo=github&color=ea4aaa)](https://github.com/sponsors/lordlobo1)
+[![Last Commit](https://img.shields.io/github/last-commit/lordlobo1/KlipShare)](https://github.com/lordlobo1/KlipShare/commits/main)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Kindle%20%2B%20KUAL-lightgrey)](https://www.mobileread.com/forums/showthread.php?t=203326)
 
 **Compartilhe seus destaques de leitura diretamente para o Threads, sem sair do Kindle.**
 
 KlipShare é uma extensão para o [KUAL](https://www.mobileread.com/forums/showthread.php?t=203326) (Kindle Unified Application Launcher) que lê os destaques salvos no `My Clippings.txt` e publica automaticamente no [Threads](https://www.threads.net) com um toque — sem abrir o celular, sem copiar e colar.
+
+---
+
+## Em ação
+
+<p align="center">
+  <img src="docs/01-kindle-ebook.png" width="160" alt="E-book no Kindle">
+  &nbsp;
+  <img src="docs/02-kindle-highlight.png" width="160" alt="Destaque selecionado">
+  &nbsp;
+  <img src="docs/03-kual-menu.png" width="220" alt="Menu KlipShare no KUAL">
+  &nbsp;
+  <img src="docs/04-kindle-posting.png" width="220" alt="Postando no Threads">
+  &nbsp;
+  <img src="docs/05-threads-result.png" width="260" alt="Post publicado no Threads">
+</p>
+
+<p align="center"><em>Leia → destaque → selecione no menu → publicado no Threads em segundos.</em></p>
 
 ---
 
@@ -269,11 +290,12 @@ Compartilhado via KlipShare para Kindle
 | KlipShare não aparece no KUAL | Pasta copiada no lugar errado | Verifique se `klipshare/` está diretamente dentro de `extensions/` |
 | "ERRO: credentials.conf nao encontrado" | Arquivo ausente ou caminho incorreto | Confirme que está em `extensions/klipshare/config/credentials.conf` |
 | "ERRO: curl nao encontrado" | KOReader não instalado | Instale o KOReader — ele fornece o `curl` usado pela extensão |
-| "FALHA ao criar post. Verifique WiFi e token" | Token inválido ou expirado | Repita o Passo 3 na página de setup para gerar um novo token |
-| "Sem WiFi. Post salvo na fila offline" | Kindle sem conexão WiFi | Normal — o post será enviado automaticamente quando o WiFi reconectar |
+| "FALHA ao publicar. Tente novamente." | Token inválido ou expirado | Repita o Passo 3 na página de setup para gerar um novo token |
+| "Sem WiFi. Post salvo na fila offline." | Kindle sem conexão WiFi | Normal — o post será enviado automaticamente quando o WiFi reconectar |
 | Lista de destaques vazia | Nenhum destaque no `My Clippings.txt` | Faça ao menos um destaque em um livro e clique em "Atualizar lista" |
 | Arquivo salvo como `credentials.conf.txt` | Extensão duplicada no Windows | Ative a exibição de extensões no Explorer e renomeie removendo o `.txt` |
 | Página de setup mostra erro de autorização | Sessão do Threads expirada no navegador | Abra a página de setup no navegador onde você está logado no Threads |
+| Highlights do KOReader não aparecem | Nenhum highlight marcado ou path incorreto | Confirme que os destaques foram feitos com KOReader e clique em "Atualizar lista" |
 
 ---
 
@@ -298,6 +320,8 @@ Se o KlipShare foi útil para você, considere apoiar o desenvolvimento:
 
 Qualquer contribuição ajuda a manter o projeto ativo e financiar novas funcionalidades.
 
+Se preferir, deixar uma ⭐ no repositório também ajuda outras pessoas a descobrir o projeto.
+
 ---
 
 ## Licença
@@ -308,7 +332,13 @@ MIT — livre para uso pessoal e distribuição.
 
 ## English summary
 
-**KlipShare** is a KUAL extension for jailbroken Kindles that reads highlights from `My Clippings.txt` (and KOReader) and posts them directly to [Threads](https://www.threads.net) with a single tap. No phone needed. Features include automatic post formatting, smart capitalization, offline queue, token auto-refresh, and KOReader highlight support.
+**KlipShare** is a KUAL extension for jailbroken Kindles that reads highlights from `My Clippings.txt` (and KOReader) and posts them directly to [Threads](https://www.threads.net) with a single tap — no phone needed.
+
+**Features:** automatic post formatting (`"quote" — Book #kindle`), smart capitalization (including accented characters), character count indicator, offline queue, 60-day token auto-refresh, KOReader highlight support, up to 30 recent highlights in the menu.
+
+**Requirements:** jailbroken Kindle · KUAL 2.x · KOReader (provides `curl`) · Threads account
+
+**Setup:** download ZIP → copy `kindle/` folder to `extensions/klipshare/` on your Kindle → authorize at [klipshare.vercel.app/setup](https://klipshare.vercel.app/setup) → paste the generated `credentials.conf` → done.
 
 **Privacy:** KlipShare does not collect or transmit any personal data to its own servers. The only network communication is with the official Threads API (Meta) to publish posts authorized by the user. The access token is stored locally on the device only.
 
