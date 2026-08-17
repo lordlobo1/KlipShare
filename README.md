@@ -25,11 +25,13 @@ KlipShare é uma extensão para o [KUAL](https://www.mobileread.com/forums/showt
 Antes de instalar, verifique se o seu Kindle atende a todos os requisitos abaixo.
 
 ### 1. Kindle com jailbreak
+
 O KlipShare requer um Kindle desbloqueado (jailbreak). Modelos compatíveis e instruções estão disponíveis no [MobileRead Forum](https://www.mobileread.com/forums/showthread.php?t=346037).
 
 **Como verificar:** conecte o Kindle ao computador. Se existir uma pasta `extensions/` na raiz do dispositivo, o jailbreak está ativo.
 
 ### 2. KUAL instalado
+
 O KUAL (Kindle Unified Application Launcher) é o menu de extensões do Kindle.
 
 **Como verificar:** na tela inicial do Kindle, procure por um livro chamado **"KUAL"** na biblioteca. Se aparecer, está instalado.
@@ -37,6 +39,7 @@ O KUAL (Kindle Unified Application Launcher) é o menu de extensões do Kindle.
 **Como instalar:** baixe em [MobileRead — KUAL](https://www.mobileread.com/forums/showthread.php?t=203326) e copie o arquivo `.azw2` para a pasta `documents/` do Kindle.
 
 ### 3. KOReader instalado
+
 O KOReader fornece o programa `curl` que o KlipShare usa para se comunicar com a API do Threads.
 
 **Como verificar:** abra o KUAL. Se aparecer a opção **KOReader**, está instalado.
@@ -44,6 +47,7 @@ O KOReader fornece o programa `curl` que o KlipShare usa para se comunicar com a
 **Como instalar:** baixe em [github.com/koreader/koreader](https://github.com/koreader/koreader/releases) e siga as instruções para Kindle.
 
 ### 4. Conta no Threads
+
 Você precisa de uma conta ativa no [Threads](https://www.threads.net) para autorizar o app.
 
 ---
@@ -76,108 +80,106 @@ Kindle/
         │   ├── generate_menu.sh
         │   └── share_threads.sh
         └── config/               ← criar esta pasta manualmente
-            └── credentials.conf  ← criar este arquivo manualmente
+            └── credentials.conf  ← criado no Passo 4
 ```
 
 5. Dentro de `extensions/klipshare/`, crie a pasta `config/` manualmente
-6. Dentro de `config/`, crie o arquivo `credentials.conf` conforme o Passo 4
 
-### Passo 3 — Obter as credenciais do Threads
+### Passo 3 — Autorizar o KlipShare no Threads
 
-Acesse a página de configuração automática:
+Abra a página abaixo **no navegador do celular ou computador onde você está logado no Threads**:
 
 **[https://klipshare.vercel.app/setup](https://klipshare.vercel.app/setup)**
 
 1. Clique em **Autorizar com Threads**
-2. Autorize o app na tela do Threads
-3. A página gera o `credentials.conf` automaticamente — copie o conteúdo
+2. Na tela do Threads, clique em **Continuar como @seu_usuario**
+3. Aguarde — a página gera o conteúdo do `credentials.conf` automaticamente
+4. Clique em **Copiar**
 
-> Prefere fazer manualmente? Expanda as instruções abaixo.
+> A página não armazena nenhum dado. O token é gerado e exibido apenas para você.
 
 <details>
-<summary>Configuração manual (avançado)</summary>
+<summary>Configuração manual — para quem não consegue usar a página acima</summary>
 
-Esta etapa conecta o KlipShare à sua conta do Threads. Você precisará de dois dados:
+Esta etapa conecta o KlipShare à sua conta do Threads por linha de comando. Você precisará de dois dados:
 
 - **User ID** — número que identifica sua conta na API do Threads
 - **Access Token** — chave de acesso que autoriza o KlipShare a publicar em seu nome
 
 #### 3.1 — Autorizar o KlipShare
 
-Abra o link abaixo no navegador do celular ou computador **onde você está logado no Threads**:
+Abra o link abaixo no navegador **onde você está logado no Threads**:
 
 ```
-https://threads.net/oauth/authorize?client_id=1817010732620817&redirect_uri=https://localhost&scope=threads_basic,threads_content_publish&response_type=code
+https://threads.net/oauth/authorize?client_id=1817010732620817&redirect_uri=https://klipshare.vercel.app/setup&scope=threads_basic,threads_content_publish&response_type=code
 ```
 
-- O Threads mostrará uma tela pedindo permissão para o KlipShare publicar em seu nome
+- O Threads mostrará uma tela pedindo permissão para publicar em seu nome
 - Clique em **Continuar como @seu_usuario**
-- O navegador tentará abrir `https://localhost` e mostrará uma mensagem de erro ("Esse site não pode ser acessado" ou similar) — **isso é completamente normal e esperado**
-- **Não feche a aba.** Olhe para a barra de endereços do navegador
+- Você será redirecionado de volta para a página de setup com o código na URL
+- **Antes que a página carregue completamente**, olhe para a barra de endereços — ela estará assim:
 
-A URL na barra de endereços estará assim:
 ```
-https://localhost/?code=AQBxxxxxxxxxxxxxxxxxxxxxxxx#_
+https://klipshare.vercel.app/setup?code=AQBxxxxxxxxxxxxxxxxxxxxxxxx#_
 ```
 
-Selecione e copie apenas o trecho entre `code=` e `#_`. Exemplo:
+Copie apenas o trecho entre `code=` e `#_`. Exemplo:
 ```
 AQBxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-> ⚠️ **Atenção:** este código expira em **10 minutos**. Complete o passo seguinte sem demora.
+> ⚠️ Este código expira em **10 minutos**. Complete os passos seguintes sem demora.
 
-#### 3.2 — Trocar o código pelo token de acesso
+#### 3.2 — Trocar o código pelo token de curta duração
 
-**No Windows — abra o PowerShell** (tecla Windows + R → digite `powershell` → Enter) e execute:
+**Windows (PowerShell):**
 
 ```powershell
 curl.exe -X POST "https://graph.threads.net/oauth/access_token" `
   -d "client_id=1817010732620817" `
   -d "grant_type=authorization_code" `
-  -d "redirect_uri=https://localhost" `
+  -d "redirect_uri=https://klipshare.vercel.app/setup" `
   -d "code=COLE_O_CODIGO_AQUI"
 ```
 
-**No Mac/Linux — abra o Terminal** e execute:
+**Mac/Linux (Terminal):**
 
 ```sh
 curl -X POST "https://graph.threads.net/oauth/access_token" \
   -d "client_id=1817010732620817" \
   -d "grant_type=authorization_code" \
-  -d "redirect_uri=https://localhost" \
+  -d "redirect_uri=https://klipshare.vercel.app/setup" \
   -d "code=COLE_O_CODIGO_AQUI"
 ```
 
-Substitua `COLE_O_CODIGO_AQUI` pelo código copiado no passo anterior.
-
-A resposta será um texto no formato JSON como este:
+A resposta JSON terá este formato:
 
 ```json
 {
   "access_token": "THAAAAxxxxxxxxxxxxxxxx",
   "token_type": "bearer",
-  "expires_in": 3600
+  "expires_in": 3600,
+  "user_id": 12345678901234567
 }
 ```
 
-Copie o valor de `access_token`. Este é o **token de curta duração** (válido por 1 hora).
+Anote o `user_id` — este é o seu **User ID**. Copie o `access_token` — este é o **token de curta duração**.
 
 #### 3.3 — Gerar token de longa duração (válido por 60 dias)
 
-Execute o comando abaixo substituindo `TOKEN_CURTO` pelo token obtido no passo anterior:
-
 **Windows (PowerShell):**
+
 ```powershell
 curl.exe "https://graph.threads.net/access_token?grant_type=th_exchange_token&access_token=TOKEN_CURTO"
 ```
 
 **Mac/Linux (Terminal):**
+
 ```sh
 curl "https://graph.threads.net/access_token?grant_type=th_exchange_token&access_token=TOKEN_CURTO"
 ```
 
-A resposta será:
+A resposta:
 
 ```json
 {
@@ -187,53 +189,27 @@ A resposta será:
 }
 ```
 
-Copie o novo `access_token`. Este é o **token de longa duração** que você usará no arquivo de configuração.
+Copie o novo `access_token`. Este é o **token de longa duração** para usar no arquivo de configuração.
 
-> ✅ O KlipShare renova este token automaticamente antes de cada publicação. Você não precisará repetir este processo.
-
-#### 3.4 — Obter o seu User ID
-
-Execute o comando abaixo substituindo `TOKEN_LONGO` pelo token obtido no passo 3.3:
-
-**Windows (PowerShell):**
-```powershell
-curl.exe "https://graph.threads.net/me?fields=id&access_token=TOKEN_LONGO"
-```
-
-**Mac/Linux (Terminal):**
-```sh
-curl "https://graph.threads.net/me?fields=id&access_token=TOKEN_LONGO"
-```
-
-A resposta será:
-
-```json
-{
-  "id": "12345678901234567"
-}
-```
-
-Copie o valor de `id`. Este é o seu **User ID**.
+> O KlipShare renova este token automaticamente. Você não precisará repetir este processo.
 
 </details>
 
 ### Passo 4 — Criar o arquivo de configuração
 
-Crie o arquivo `credentials.conf` dentro da pasta `extensions/klipshare/config/` no Kindle com o seguinte conteúdo:
+Crie o arquivo `credentials.conf` dentro da pasta `extensions/klipshare/config/` no Kindle com o conteúdo copiado no Passo 3:
 
 ```sh
 THREADS_USER_ID="12345678901234567"
 THREADS_ACCESS_TOKEN="THAAAAyyyyyyyyyyyyyyyy"
 ```
 
-Substitua pelos valores reais obtidos nos passos 3.3 e 3.4.
+**Como criar o arquivo:**
 
-**Como criar o arquivo corretamente:**
-
-- **Windows:** abra o Bloco de Notas → cole o conteúdo → **Arquivo → Salvar como** → navegue até `extensions/klipshare/config/` → no campo **Nome do arquivo** digite `credentials.conf` → em **Tipo** selecione **Todos os arquivos (\*.\*)** → clique em Salvar
+- **Windows:** abra o Bloco de Notas → cole o conteúdo copiado → **Arquivo → Salvar como** → navegue até `extensions/klipshare/config/` → no campo **Nome do arquivo** digite `credentials.conf` → em **Tipo** selecione **Todos os arquivos (\*.\*)** → clique em Salvar
 - **Mac:** abra o TextEdit → **Formato → Converter para Formato Simples** → cole o conteúdo → **Arquivo → Salvar** → navegue até a pasta correta → salve como `credentials.conf`
 
-> ⚠️ Verifique que o arquivo se chama exatamente `credentials.conf` e **não** `credentials.conf.txt`. No Windows, ative a exibição de extensões em **Explorador de Arquivos → Exibir → Extensões de nome de arquivo** para confirmar.
+> ⚠️ **Atenção:** verifique que o arquivo se chama exatamente `credentials.conf` e **não** `credentials.conf.txt`. No Windows, ative a exibição de extensões em **Explorador de Arquivos → Exibir → Extensões de nome de arquivo** para confirmar.
 
 > 🔒 **Segurança:** nunca compartilhe este arquivo. O token dá acesso à publicação na sua conta do Threads.
 
@@ -275,11 +251,11 @@ Compartilhado via KlipShare para Kindle
 | KlipShare não aparece no KUAL | Pasta copiada no lugar errado | Verifique se `klipshare/` está diretamente dentro de `extensions/` |
 | "ERRO: credentials.conf nao encontrado" | Arquivo ausente ou caminho incorreto | Confirme que está em `extensions/klipshare/config/credentials.conf` |
 | "ERRO: curl nao encontrado" | KOReader não instalado | Instale o KOReader — ele fornece o `curl` usado pela extensão |
-| "FALHA ao criar post. Verifique WiFi e token" | Token inválido ou sem internet | Refaça o processo de obtenção do token; verifique o WiFi do Kindle |
-| "Sem WiFi. Post salvo na fila offline" | Kindle sem conexão WiFi | Normal — o post será enviado quando o WiFi reconectar |
-| Lista de destaques vazia | Nenhum destaque em `My Clippings.txt` | Faça ao menos um destaque em um livro no Kindle e clique em "Atualizar lista" |
-| Código OAuth expirou | Mais de 10 min entre os passos 3.1 e 3.2 | Repita o passo 3.1 e complete o 3.2 imediatamente |
-| Arquivo salvo como `credentials.conf.txt` | Extensão duplicada no Windows | Ative a exibição de extensões e renomeie removendo o `.txt` |
+| "FALHA ao criar post. Verifique WiFi e token" | Token inválido ou expirado | Repita o Passo 3 na página de setup para gerar um novo token |
+| "Sem WiFi. Post salvo na fila offline" | Kindle sem conexão WiFi | Normal — o post será enviado automaticamente quando o WiFi reconectar |
+| Lista de destaques vazia | Nenhum destaque no `My Clippings.txt` | Faça ao menos um destaque em um livro e clique em "Atualizar lista" |
+| Arquivo salvo como `credentials.conf.txt` | Extensão duplicada no Windows | Ative a exibição de extensões no Explorer e renomeie removendo o `.txt` |
+| Página de setup mostra erro de autorização | Sessão do Threads expirada no navegador | Abra a página de setup no navegador onde você está logado no Threads |
 
 ---
 
