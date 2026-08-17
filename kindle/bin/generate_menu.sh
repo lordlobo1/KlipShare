@@ -7,7 +7,6 @@
 CLIPS_FILE="/mnt/us/documents/My Clippings.txt"
 CLIP_CACHE="/mnt/us/extensions/klipshare/cache/clips.txt"
 MENU_FILE="/mnt/us/extensions/klipshare/menu.json"
-MAX_CLIPS=30
 MAX_LABEL=55
 QUIET=false
 [ "$1" = "--quiet" ] && QUIET=true
@@ -60,44 +59,40 @@ if [ ! -f "${CLIP_CACHE}" ] || [ "${CLIPS_FILE}" -nt "${CLIP_CACHE}" ]; then
     state=="meta"  && /^- / { state="blank"; next }
     state=="blank"           { state="text"; next }
     state=="text"  && NF>0  { text=(text=="")?$0:text" "$0 }
-    ' "${CLIPS_FILE}" 2>/dev/null | tail -n "${MAX_CLIPS}" > "${CLIP_CACHE}"
+    ' "${CLIPS_FILE}" 2>/dev/null > "${CLIP_CACHE}"
 
-    ## Adiciona highlights do KOReader respeitando o limite total MAX_CLIPS
+    ## Adiciona todos os highlights do KOReader
     mc_count=$(awk 'END{print NR}' "${CLIP_CACHE}" 2>/dev/null || echo 0)
-    ko_limit=$((MAX_CLIPS - mc_count))
+    KO_TMP="/tmp/klipshare_ko.txt"
+    : > "${KO_TMP}"
+    find /mnt/us/documents -name "metadata.*.lua" -type f 2>/dev/null > /tmp/klipshare_ko_list.txt
+    while IFS= read -r lua_file; do
+        sdr_dir=$(dirname "${lua_file}")
+        book=$(basename "${sdr_dir}" .sdr)
+        book=$(printf '%s' "${book}" | sed 's/\[[^]]*\]//g;s/  */ /g;s/^ //;s/ $//')
+        [ -z "${book}" ] && continue
+        awk -v book="${book}" '
+        BEGIN { hl=0; notes="" }
+        /\["highlighted"\] *= *true/ { hl=1 }
+        /\["notes"\] *= *"/ {
+            notes=$0
+            sub(/^.*\["notes"\] *= *"/, "", notes)
+            sub(/"[[:space:]]*,?[[:space:]]*$/, "", notes)
+        }
+        /^[[:space:]]*\}/ {
+            if (hl && length(notes)>5) print book "\t" notes
+            hl=0; notes=""
+        }
+        ' "${lua_file}"
+    done < /tmp/klipshare_ko_list.txt >> "${KO_TMP}"
+    rm -f /tmp/klipshare_ko_list.txt
 
-    if [ "${ko_limit}" -gt 0 ]; then
-        KO_TMP="/tmp/klipshare_ko.txt"
-        : > "${KO_TMP}"
-        find /mnt/us/documents -name "metadata.*.lua" -type f 2>/dev/null > /tmp/klipshare_ko_list.txt
-        while IFS= read -r lua_file; do
-            sdr_dir=$(dirname "${lua_file}")
-            book=$(basename "${sdr_dir}" .sdr)
-            book=$(printf '%s' "${book}" | sed 's/\[[^]]*\]//g;s/  */ /g;s/^ //;s/ $//')
-            [ -z "${book}" ] && continue
-            awk -v book="${book}" '
-            BEGIN { hl=0; notes="" }
-            /\["highlighted"\] *= *true/ { hl=1 }
-            /\["notes"\] *= *"/ {
-                notes=$0
-                sub(/^.*\["notes"\] *= *"/, "", notes)
-                sub(/"[[:space:]]*,?[[:space:]]*$/, "", notes)
-            }
-            /^[[:space:]]*\}/ {
-                if (hl && length(notes)>5) print book "\t" notes
-                hl=0; notes=""
-            }
-            ' "${lua_file}"
-        done < /tmp/klipshare_ko_list.txt >> "${KO_TMP}"
-        rm -f /tmp/klipshare_ko_list.txt
-
-        if [ -s "${KO_TMP}" ]; then
-            n="${mc_count}"
-            awk -F'\t' -v start="${n}" -v limit="${ko_limit}" \
-                'NR<=limit{print start+NR "\t" $1 "\t" $2}' "${KO_TMP}" >> "${CLIP_CACHE}"
-        fi
-        rm -f "${KO_TMP}"
+    if [ -s "${KO_TMP}" ]; then
+        n="${mc_count}"
+        awk -F'\t' -v start="${n}" \
+            '{print start+NR "\t" $1 "\t" $2}' "${KO_TMP}" >> "${CLIP_CACHE}"
     fi
+    rm -f "${KO_TMP}"
 fi
 
 total=$(awk 'END{print NR}' "${CLIP_CACHE}" 2>/dev/null || echo 0)
