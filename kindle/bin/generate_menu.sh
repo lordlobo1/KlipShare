@@ -10,6 +10,7 @@ MENU_FILE="/mnt/us/extensions/klipshare/menu.json"
 MAX_LABEL=55
 QUIET=false
 [ "$1" = "--quiet" ] && QUIET=true
+EXCLUDED="/mnt/us/extensions/klipshare/cache/excluded.txt"
 
 ## Feedback visual
 FBINK_BIN="true"
@@ -95,21 +96,37 @@ if [ ! -f "${CLIP_CACHE}" ] || [ "${CLIPS_FILE}" -nt "${CLIP_CACHE}" ]; then
     rm -f "${KO_TMP}"
 fi
 
-total=$(awk 'END{print NR}' "${CLIP_CACHE}" 2>/dev/null || echo 0)
+## Resolve arquivo de exclusao (fallback para /dev/null se vazio/ausente)
+_ef="${EXCLUDED}"
+[ -s "${_ef}" ] || _ef="/dev/null"
 
-## Constroi itens JSON — single awk pass (multibyte-safe, sem forks por clipping)
-items=$(awk -F'\t' -v ml="${MAX_LABEL}" '
+total=$(awk -F'\t' -v ef="${_ef}" '
+    BEGIN { while ((getline l < ef) > 0) ex[l]=1; close(ef) }
+    { if (!(($2"\t"$3) in ex)) c++ }
+    END { print c+0 }
+' "${CLIP_CACHE}" 2>/dev/null || echo 0)
+
+## Constroi itens JSON com submenu Publicar / Deletar por destaque
+items=$(awk -F'\t' -v ml="${MAX_LABEL}" -v ef="${_ef}" '
+BEGIN {
+    while ((getline l < ef) > 0) ex[l] = 1
+    close(ef)
+    first = 1
+}
 function jesc(s) {
     gsub(/\\/, "\\\\", s); gsub(/"/, "\\\"", s)
     gsub(/\t/, " ", s);    gsub(/\r/, "", s)
     return s
 }
 {
+    if (($2 "\t" $3) in ex) next
     pl = length($3) + length($2) + 35
     lb = (length($3) > ml) ? substr($3,1,ml) "..." : $3
-    if (NR > 1) printf ","
-    printf "{\"name\":\"%s\",\"priority\":%s,\"action\":\"./bin/share_threads.sh\",\"params\":\"%s\",\"exitmenu\":false,\"refresh\":false,\"status\":false,\"internal\":\"status Postando no Threads...\"}",
-        jesc("[" pl "] " lb), $1, $1
+    pub = sprintf("{\"name\":\"Publicar\",\"priority\":1,\"action\":\"./bin/share_threads.sh\",\"params\":\"%s\",\"exitmenu\":false,\"refresh\":false,\"status\":false,\"internal\":\"status Postando no Threads...\"}", $1)
+    del = sprintf("{\"name\":\"Deletar destaque\",\"priority\":2,\"action\":\"./bin/delete_clip.sh\",\"params\":\"%s\",\"exitmenu\":false,\"refresh\":true,\"status\":false,\"internal\":\"status Removendo...\"}", $1)
+    if (!first) printf ","
+    first = 0
+    printf "{\"name\":\"%s\",\"priority\":%s,\"items\":[%s,%s]}", jesc("[" pl "] " lb), $1, pub, del
 }
 ' "${CLIP_CACHE}")
 
