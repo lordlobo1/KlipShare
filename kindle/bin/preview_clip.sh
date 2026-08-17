@@ -46,7 +46,7 @@ if [ ! -f "${CLIP_CACHE}" ]; then
             gsub(/ \(z-library[^)]*\)/,"",book)
             gsub(/ \(1lib[^)]*\)/,"",book)
             gsub(/ \(z-lib[^)]*\)/,"",book)
-            sub(/ \([^)]*\) \(.*$/,"",book)
+            while (book ~ / \([^)]*\).*\([^)]*\)/) sub(/ \([^)]*\)$/, "", book)
             gsub(/\[[^\]]*\]/,"",book)
             gsub(/[[:space:]]+/," ",book)
             sub(/^[[:space:]]+/,"",book)
