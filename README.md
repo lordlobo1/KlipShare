@@ -84,6 +84,19 @@ Kindle/
 
 ### Passo 3 — Obter as credenciais do Threads
 
+Acesse a página de configuração automática:
+
+**[https://klipshare-ovczwy5pa-geopoliticarpgs-projects.vercel.app/setup](https://klipshare-ovczwy5pa-geopoliticarpgs-projects.vercel.app/setup)**
+
+1. Clique em **Autorizar com Threads**
+2. Autorize o app na tela do Threads
+3. A página gera o `credentials.conf` automaticamente — copie o conteúdo
+
+> Prefere fazer manualmente? Expanda as instruções abaixo.
+
+<details>
+<summary>Configuração manual (avançado)</summary>
+
 Esta etapa conecta o KlipShare à sua conta do Threads. Você precisará de dois dados:
 
 - **User ID** — número que identifica sua conta na API do Threads
@@ -201,6 +214,8 @@ A resposta será:
 ```
 
 Copie o valor de `id`. Este é o seu **User ID**.
+
+</details>
 
 ### Passo 4 — Criar o arquivo de configuração
 
