@@ -86,7 +86,7 @@ Kindle/
 
 Acesse a página de configuração automática:
 
-**[https://klipshare-ovczwy5pa-geopoliticarpgs-projects.vercel.app/setup](https://klipshare-ovczwy5pa-geopoliticarpgs-projects.vercel.app/setup)**
+**[https://klipshare.vercel.app/setup](https://klipshare.vercel.app/setup)**
 
 1. Clique em **Autorizar com Threads**
 2. Autorize o app na tela do Threads

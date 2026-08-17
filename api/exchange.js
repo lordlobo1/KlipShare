@@ -39,14 +39,8 @@ module.exports = async function handler(req, res) {
             return res.status(400).json({ error: 'Falha ao obter token longo', details: longData });
         }
 
-        // 3. Obtém User ID
-        const userResp = await fetch(
-            `https://graph.threads.net/me?fields=id&access_token=${encodeURIComponent(longData.access_token)}`
-        );
-        const userData = await userResp.json();
-
         return res.status(200).json({
-            user_id:      userData.id,
+            user_id:      shortData.user_id,
             access_token: longData.access_token
         });
 
