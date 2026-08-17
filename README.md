@@ -30,11 +30,11 @@ O KlipShare requer um Kindle desbloqueado (jailbreak). Modelos compatíveis e in
 
 **Como verificar:** conecte o Kindle ao computador. Se existir uma pasta `extensions/` na raiz do dispositivo, o jailbreak está ativo.
 
-### 2. KUAL instalado
+### 2. KUAL instalado (versão 2.x ou superior)
 
-O KUAL (Kindle Unified Application Launcher) é o menu de extensões do Kindle.
+O KUAL (Kindle Unified Application Launcher) é o menu de extensões do Kindle. O KlipShare requer a versão **2.x ou superior**, que suporta menus em JSON e menus dinâmicos — recursos usados para exibir os destaques em tempo real.
 
-**Como verificar:** na tela inicial do Kindle, procure por um livro chamado **"KUAL"** na biblioteca. Se aparecer, está instalado.
+**Como verificar:** na tela inicial do Kindle, procure por um livro chamado **"KUAL"** na biblioteca. Se aparecer, está instalado. Qualquer download recente do link abaixo já é a versão 2.x.
 
 **Como instalar:** baixe em [MobileRead — KUAL](https://www.mobileread.com/forums/showthread.php?t=203326) e copie o arquivo `.azw2` para a pasta `documents/` do Kindle.
 
