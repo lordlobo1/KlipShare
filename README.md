@@ -312,8 +312,7 @@ THREADS_ACCESS_TOKEN="THAAAAyyyyyyyyyyyyyyyy"
 
 — O Homem é Aquilo que Ele Pensa (James Allen)
 
-#kindle #leitura
-Compartilhado via KlipShare para Kindle
+via KlipShare for #Kindle
 ```
 
 **Twitter/X** (até 280 caracteres, texto truncado independentemente se necessário):
@@ -322,7 +321,7 @@ Compartilhado via KlipShare para Kindle
 
 — O Homem é Aquilo que Ele Pensa (James Allen)
 
-#kindle #leitura
+via KlipShare for #Kindle
 ```
 
 ---

@@ -123,8 +123,8 @@ raw_text=$(printf '%s' "${raw_text}" | awk '{print toupper(substr($0,1,1)) subst
 book_len=$(printf '%s' "${book}" | awk '{print length}')
 
 ## --- Trunca para Threads (ate 500 bytes) ---
-# Overhead: aspas(2) + "\n\n— "(4) + book + "\n\n#kindle #leitura\nCompartilhado via KlipShare para Kindle"(61)
-th_overhead=$((book_len + 67))
+# Overhead: aspas(2) + "\n\n— "(4) + book + "\n\nvia KlipShare for #Kindle"(25) + 4 newlines
+th_overhead=$((book_len + 35))
 th_max=$((500 - th_overhead))
 [ "${th_max}" -gt "${MAX_QUOTE_LEN}" ] && th_max="${MAX_QUOTE_LEN}"
 [ "${th_max}" -lt 50 ] && th_max=50
@@ -136,9 +136,9 @@ if [ "${text_len}" -gt "${th_max}" ]; then
 fi
 
 ## --- Trunca para Twitter/X (ate TWITTER_MAX_LEN bytes, padrao 280) ---
-# Overhead: aspas(2) + "\n\n— "(6, pois — e 3 bytes UTF-8) + book + "\n\n#kindle #leitura"(18)
+# Overhead: aspas(2) + "\n\n— "(4) + book + "\n\nvia KlipShare for #Kindle"(25) + 4 newlines = 35
 # Premium: defina TWITTER_MAX_LEN=4096 (ou outro valor) no credentials.conf
-tw_overhead=$((book_len + 26))
+tw_overhead=$((book_len + 35))
 tw_max=$((TWITTER_MAX_LEN - tw_overhead))
 [ "${tw_max}" -lt 30 ] && tw_max=30
 tw_text="${raw_text}"
@@ -155,8 +155,7 @@ post_text="\"${text}\"
 
 — ${book}
 
-#kindle #leitura
-Compartilhado via KlipShare para Kindle"
+via KlipShare for #Kindle"
 
 ## --- Funcoes de rede ---
 wifi_ok() {
@@ -181,7 +180,7 @@ post_to_threads() {
 }
 
 post_to_twitter() {
-    _tw_body=$(printf '"%s"\n\n— %s\n\n#kindle #leitura' "${tw_text}" "${book}")
+    _tw_body=$(printf '"%s"\n\n— %s\n\nvia KlipShare for #Kindle' "${tw_text}" "${book}")
     _tw_json=$(printf '%s' "${_tw_body}" | awk '
         BEGIN { printf "{\"text\":\"" }
         { gsub(/\\/, "\\\\"); gsub(/"/, "\\\""); if (NR > 1) printf "\\n"; printf "%s", $0 }

@@ -88,7 +88,7 @@ if [ "${FBINK_BIN}" != "true" ]; then
     "${FBINK_BIN}" -q -m -y -12 "--- KlipShare: Pre-visualizacao ---" 2>/dev/null
     "${FBINK_BIN}" -q -m -y -10 "\"${short}...\"" 2>/dev/null
     "${FBINK_BIN}" -q -m -y -7  "-- ${book}" 2>/dev/null
-    "${FBINK_BIN}" -q -m -y -5  "#kindle #leitura | KlipShare" 2>/dev/null
+    "${FBINK_BIN}" -q -m -y -5  "via KlipShare for #Kindle" 2>/dev/null
     "${FBINK_BIN}" -q -m -y -2  "Volte ao KUAL: Publicar ou Cancelar" 2>/dev/null
 else
     feedback "Preview pronto. Volte ao KUAL: Publicar ou Cancelar."
