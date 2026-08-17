@@ -42,6 +42,7 @@ BEGIN { state="title"; book=""; text=""; n=0 }
     if (text != "") {
         n++
         gsub(/\r/, "", book); gsub(/\r/, "", text)
+        sub(/^\357\273\277/, "", book)
         gsub(/[\360-\367][\200-\277][\200-\277][\200-\277]/, "", book)
         gsub(/ \(z-library[^)]*\)/, "", book)
         gsub(/ \(1lib[^)]*\)/, "", book)
