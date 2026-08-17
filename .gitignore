@@ -8,6 +8,11 @@ cache/
 # Menu gerado dinamicamente (sobrescrito pelo Kindle)
 menu.json
 
+# Arquivos de imagem locais
+*.png
+*.jpg
+*.jpeg
+
 # Arquivos temporários do Windows
 Thumbs.db
 desktop.ini
