@@ -61,17 +61,31 @@ Você precisa de uma conta ativa no [Threads](https://www.threads.net) para auto
 1. Acesse [github.com/lordlobo1/KlipShare](https://github.com/lordlobo1/KlipShare)
 2. Clique no botão verde **Code**
 3. Clique em **Download ZIP**
-4. Extraia o arquivo ZIP no seu computador — você verá a pasta `KlipShare-main/`
+4. Extraia o arquivo ZIP no seu computador
+
+O arquivo extraído terá esta estrutura:
+
+```
+KlipShare-main/
+├── kindle/       ← pasta que vai para o Kindle
+│   ├── bin/
+│   │   ├── generate_menu.sh
+│   │   └── share_threads.sh
+│   └── config.xml
+├── api/          ← servidor (ignorar)
+├── setup/        ← servidor (ignorar)
+└── vercel.json   ← servidor (ignorar)
+```
 
 ### Passo 2 — Copiar para o Kindle
 
 1. Conecte o Kindle ao computador via cabo USB
 2. O Kindle aparecerá como um dispositivo de armazenamento (ex: `D:\` no Windows, `/Volumes/Kindle` no Mac)
-3. Abra a pasta `extensions/` na raiz do Kindle
-4. Dentro de `KlipShare-main/`, abra a pasta **`kindle/`**
-5. Copie o **conteúdo** da pasta `kindle/` para dentro de `extensions/klipshare/` (crie a pasta `klipshare/` se não existir)
+3. Na raiz do Kindle, crie a pasta `extensions/klipshare/` se ainda não existir
+4. Abra a pasta `KlipShare-main/kindle/` no computador
+5. Copie **todo o conteúdo** de `kindle/` para dentro de `extensions/klipshare/` no Kindle
 
-> ⚠️ Copie apenas o conteúdo da pasta `kindle/` — as pastas `api/` e `setup/` são para o servidor e **não vão para o Kindle**.
+> ⚠️ Copie apenas o conteúdo da pasta `kindle/`. As pastas `api/`, `setup/` e o arquivo `vercel.json` são usados pelo servidor e **não devem ir para o Kindle**.
 
 A estrutura final no Kindle deve ser exatamente esta:
 
