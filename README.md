@@ -1,5 +1,7 @@
 # KlipShare para Kindle
 
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/lordlobo1?label=Apoiar&logo=github&color=ea4aaa)](https://github.com/sponsors/lordlobo1)
+
 **Compartilhe seus destaques de leitura diretamente para o Threads, sem sair do Kindle.**
 
 KlipShare é uma extensão para o [KUAL](https://www.mobileread.com/forums/showthread.php?t=203326) (Kindle Unified Application Launcher) que lê os destaques salvos no `My Clippings.txt` e publica automaticamente no [Threads](https://www.threads.net) com um toque — sem abrir o celular, sem copiar e colar.
@@ -269,6 +271,16 @@ KlipShare **não coleta, armazena nem transmite nenhum dado pessoal** para servi
 - Nenhum dado é enviado a terceiros além da Meta
 
 Leia a [Política de Privacidade completa](PRIVACY.md).
+
+---
+
+## Apoie o projeto
+
+Se o KlipShare foi útil para você, considere apoiar o desenvolvimento:
+
+[![Sponsor](https://img.shields.io/badge/GitHub%20Sponsors-Apoiar-%23ea4aaa?logo=github)](https://github.com/sponsors/lordlobo1)
+
+Qualquer contribuição ajuda a manter o projeto ativo e financiar novas funcionalidades.
 
 ---
 
