@@ -68,7 +68,10 @@ Você precisa de uma conta ativa no [Threads](https://www.threads.net) para auto
 1. Conecte o Kindle ao computador via cabo USB
 2. O Kindle aparecerá como um dispositivo de armazenamento (ex: `D:\` no Windows, `/Volumes/Kindle` no Mac)
 3. Abra a pasta `extensions/` na raiz do Kindle
-4. Copie a pasta `klipshare/` (que está dentro de `KlipShare-main/`) para dentro de `extensions/`
+4. Dentro de `KlipShare-main/`, abra a pasta **`kindle/`**
+5. Copie o **conteúdo** da pasta `kindle/` para dentro de `extensions/klipshare/` (crie a pasta `klipshare/` se não existir)
+
+> ⚠️ Copie apenas o conteúdo da pasta `kindle/` — as pastas `api/` e `setup/` são para o servidor e **não vão para o Kindle**.
 
 A estrutura final no Kindle deve ser exatamente esta:
 
@@ -77,7 +80,6 @@ Kindle/
 └── extensions/
     └── klipshare/
         ├── config.xml
-        ├── menu.json
         ├── bin/
         │   ├── generate_menu.sh
         │   └── share_threads.sh
@@ -85,7 +87,7 @@ Kindle/
             └── credentials.conf  ← criado no Passo 4
 ```
 
-5. Dentro de `extensions/klipshare/`, crie a pasta `config/` manualmente
+6. Dentro de `extensions/klipshare/`, crie a pasta `config/` manualmente
 
 ### Passo 3 — Autorizar o KlipShare no Threads
 

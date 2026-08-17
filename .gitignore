@@ -8,6 +8,10 @@ cache/
 # Menu gerado dinamicamente (sobrescrito pelo Kindle)
 menu.json
 
+# Cópias instaladas no root (usadas pelo KUAL localmente — source of truth em kindle/)
+bin/
+config.xml
+
 # Arquivos de imagem locais
 *.png
 *.jpg
