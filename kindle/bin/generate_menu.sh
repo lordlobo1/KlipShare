@@ -73,16 +73,22 @@ if [ ! -f "${CLIP_CACHE}" ] || [ "${CLIPS_FILE}" -nt "${CLIP_CACHE}" ]; then
         book=$(printf '%s' "${book}" | sed 's/\[[^]]*\]//g;s/  */ /g;s/^ //;s/ $//')
         [ -z "${book}" ] && continue
         awk -v book="${book}" '
-        BEGIN { hl=0; notes="" }
-        /\["highlighted"\] *= *true/ { hl=1 }
+        BEGIN { hl=0; txt="" }
+        /\["highlighted"\] *= *true/    { hl=1 }
+        /\["type"\] *= *"highlight"/    { hl=1 }
         /\["notes"\] *= *"/ {
-            notes=$0
-            sub(/^.*\["notes"\] *= *"/, "", notes)
-            sub(/"[[:space:]]*,?[[:space:]]*$/, "", notes)
+            txt=$0
+            sub(/^.*\["notes"\] *= *"/, "", txt)
+            sub(/"[[:space:]]*,?[[:space:]]*$/, "", txt)
         }
-        /^[[:space:]]*\}/ {
-            if (hl && length(notes)>5) print book "\t" notes
-            hl=0; notes=""
+        /\["text"\] *= *"/ {
+            txt=$0
+            sub(/^.*\["text"\] *= *"/, "", txt)
+            sub(/"[[:space:]]*,?[[:space:]]*$/, "", txt)
+        }
+        /^[[:space:]]*\},?[[:space:]]*$/ {
+            if (hl && length(txt)>5) print book "\t" txt
+            hl=0; txt=""
         }
         ' "${lua_file}"
     done < /tmp/klipshare_ko_list.txt >> "${KO_TMP}"
