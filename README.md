@@ -107,7 +107,7 @@ Esta etapa conecta o KlipShare à sua conta do Threads. Você precisará de dois
 Abra o link abaixo no navegador do celular ou computador **onde você está logado no Threads**:
 
 ```
-https://threads.net/oauth/authorize?client_id=27888721924156180&redirect_uri=https://localhost&scope=threads_basic,threads_content_publish&response_type=code
+https://threads.net/oauth/authorize?client_id=1817010732620817&redirect_uri=https://localhost&scope=threads_basic,threads_content_publish&response_type=code
 ```
 
 - O Threads mostrará uma tela pedindo permissão para o KlipShare publicar em seu nome
@@ -133,7 +133,7 @@ AQBxxxxxxxxxxxxxxxxxxxxxxxx
 
 ```powershell
 curl.exe -X POST "https://graph.threads.net/oauth/access_token" `
-  -d "client_id=27888721924156180" `
+  -d "client_id=1817010732620817" `
   -d "grant_type=authorization_code" `
   -d "redirect_uri=https://localhost" `
   -d "code=COLE_O_CODIGO_AQUI"
@@ -143,7 +143,7 @@ curl.exe -X POST "https://graph.threads.net/oauth/access_token" `
 
 ```sh
 curl -X POST "https://graph.threads.net/oauth/access_token" \
-  -d "client_id=27888721924156180" \
+  -d "client_id=1817010732620817" \
   -d "grant_type=authorization_code" \
   -d "redirect_uri=https://localhost" \
   -d "code=COLE_O_CODIGO_AQUI"
