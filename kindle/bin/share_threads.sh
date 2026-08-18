@@ -167,10 +167,15 @@ post_to_twitter() {
         -H "Authorization: Bearer ${TWITTER_ACCESS_TOKEN}" \
         -H "Content-Type: application/json" \
         -d "${_tw_json}" 2>/dev/null)
-    if printf '%s' "${_r}" | grep -q '"status":401'; then
-        return 2
-    fi
-    printf '%s' "${_r}" | grep -q '"id"'
+    printf '%s' "${_r}" | grep -q '"id"' && return 0
+    if printf '%s' "${_r}" | grep -q '"status":401'; then return 2; fi
+    if printf '%s' "${_r}" | grep -q '"code":89'; then return 2; fi
+    _tw_err=$(printf '%s' "${_r}" | grep -o '"detail":"[^"]*"\|"message":"[^"]*"' | head -1 \
+        | sed 's/^"[^"]*":"//;s/"$//')
+    [ -n "${_tw_err}" ] \
+        && feedback "Twitter: ${_tw_err}" \
+        || feedback "Twitter: falha (sem detalhe na resposta)"
+    return 1
 }
 
 flush_queue() {

@@ -26,3 +26,5 @@ desktop.ini
 
 # Arquivos temporários do macOS
 .DS_Store
+.vercel
+.env*
