@@ -33,8 +33,13 @@ feedback() {
 
 mkdir -p "$(dirname "${CLIP_CACHE}")"
 
-## Reparsa My Clippings.txt apenas se houver novos destaques
-if [ ! -f "${CLIP_CACHE}" ] || [ "${CLIPS_FILE}" -nt "${CLIP_CACHE}" ]; then
+## Reparsa se cache ausente, My Clippings.txt atualizado, ou novo metadata KOReader
+_ko_changed=false
+[ -f "${CLIP_CACHE}" ] && \
+    find /mnt/us/documents -name "metadata.*.lua" -newer "${CLIP_CACHE}" -type f 2>/dev/null \
+    | grep -q . && _ko_changed=true
+
+if [ ! -f "${CLIP_CACHE}" ] || [ "${CLIPS_FILE}" -nt "${CLIP_CACHE}" ] || [ "${_ko_changed}" = "true" ]; then
     feedback "Lendo clippings..."
     awk '
     BEGIN { state="title"; book=""; text=""; n=0 }
@@ -70,7 +75,8 @@ if [ ! -f "${CLIP_CACHE}" ] || [ "${CLIPS_FILE}" -nt "${CLIP_CACHE}" ]; then
     while IFS= read -r lua_file; do
         sdr_dir=$(dirname "${lua_file}")
         book=$(basename "${sdr_dir}" .sdr)
-        book=$(printf '%s' "${book}" | sed 's/\[[^]]*\]//g;s/  */ /g;s/^ //;s/ $//')
+        book=$(printf '%s' "${book}" | sed \
+            's/_[0-9A-Za-z]\{8,\}$//;s/\.[a-zA-Z0-9]\{2,5\}$//;s/\[[^]]*\]//g;s/  */ /g;s/^ //;s/ $//')
         [ -z "${book}" ] && continue
         awk -v book="${book}" '
         BEGIN { hl=0; txt="" }
