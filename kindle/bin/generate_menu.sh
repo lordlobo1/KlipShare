@@ -158,8 +158,6 @@ function jesc(s) {
 }
 ' "${CLIP_CACHE}")
 
-<<<<<<< HEAD
-=======
 ## Adiciona item de acao "Atualizar lista" ao final
 refresh_item='{"name":"Atualizar lista","priority":999,"action":"./bin/generate_menu.sh","exitmenu":false,"refresh":true,"status":false,"internal":"status Atualizando clippings..."}'
 if [ -n "${items}" ]; then
@@ -168,7 +166,6 @@ else
     items="${refresh_item}"
 fi
 
->>>>>>> b200a80 (fix: resolve KUAL dynamic menu bugs, token validation, and sync kindle binaries)
 ## Escreve menu.json e imprime para o KUAL (type="exec")
 _json=$(printf '{"items":[{"name":"KlipShare — Threads/X (%s clippings)","priority":0,"items":[%s]}]}' \
     "${total}" "${items}")
