@@ -5,9 +5,9 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Kindle%20%2B%20KUAL-lightgrey)](https://www.mobileread.com/forums/showthread.php?t=203326)
 
-**Compartilhe seus destaques de leitura no Threads e Twitter/X, sem sair do Kindle.**
+**Compartilhe seus destaques de leitura no Threads (e opcionalmente no Twitter/X), sem sair do Kindle.**
 
-KlipShare é uma extensão para o [KUAL](https://www.mobileread.com/forums/showthread.php?t=203326) (Kindle Unified Application Launcher) que lê os destaques salvos no `My Clippings.txt` e publica automaticamente no [Threads](https://www.threads.net) e no [Twitter/X](https://x.com) com um toque — sem abrir o celular, sem copiar e colar.
+KlipShare é uma extensão para o [KUAL](https://www.mobileread.com/forums/showthread.php?t=203326) (Kindle Unified Application Launcher) que lê os destaques salvos no `My Clippings.txt` e publica automaticamente no [Threads](https://www.threads.net) com um toque — sem abrir o celular, sem copiar e colar. O Twitter/X é suportado como plataforma secundária opcional, mas requer créditos pagos na [X Developer Platform](https://developer.x.com).
 
 ---
 
@@ -40,7 +40,7 @@ KlipShare é uma extensão para o [KUAL](https://www.mobileread.com/forums/showt
 - **Capitalização inteligente** — capitaliza a primeira letra, incluindo caracteres acentuados (á, é, ó...)
 - **Indicador de caracteres** — exibe o tamanho estimado do post antes de publicar
 - **Fila offline** — se o Kindle estiver sem WiFi, o post é salvo e enviado automaticamente na próxima conexão
-- **Token persistente** — renovação automática dos tokens do Threads (60 dias) e Twitter/X (rotativo)
+- **Token persistente** — renovação automática do token do Threads (60 dias)
 - **Suporte ao KOReader** — lê highlights do KOReader além do `My Clippings.txt` nativo
 - **Todos os destaques disponíveis** exibidos no menu, sem limite
 
@@ -79,6 +79,8 @@ Você precisa de uma conta ativa no [Threads](https://www.threads.net) para auto
 ### 5. Conta no Twitter/X (opcional)
 
 Para postar também no Twitter/X, você precisará de uma conta no [X (Twitter)](https://x.com). A configuração é feita separadamente após o Threads e é totalmente opcional — sem ela o KlipShare continua funcionando normalmente apenas no Threads.
+
+> **Aviso:** desde 2024, o X Free tier exige **créditos pagos** no [X Developer Portal](https://developer.x.com) para publicar via API. Sem créditos ativos, os tweets serão rejeitados com `"credits depleted"`, mesmo com credenciais corretas.
 
 ---
 
@@ -244,32 +246,23 @@ Copie o novo `access_token`. Este é o **token de longa duração** para usar no
 
 </details>
 
-### Passo 3.5 — Autorizar o Twitter/X (opcional)
+### Passo 3.5 — Configurar o Twitter/X (opcional)
 
 > Pule esta etapa se quiser publicar apenas no Threads.
 
-Abra a página abaixo **no navegador onde você está logado no Twitter/X**:
-
-**[https://klipshare.vercel.app/setup/twitter](https://klipshare.vercel.app/setup/twitter)**
-
-1. Clique em **Autorizar com X (Twitter)**
-2. Confirme a autorização na tela do X
-3. A página exibirá três linhas — clique em **Copiar**
-4. Abra o `credentials.conf` e cole o conteúdo copiado **ao final do arquivo** (após as linhas do Threads)
-
-O arquivo ficará assim:
+O Twitter/X usa um servidor proxy com autenticação OAuth 1.0a. A postagem é feita pela infra do KlipShare, não diretamente pelo Kindle. Para habilitar, adicione as linhas abaixo **ao final do** `credentials.conf` (após as linhas do Threads):
 
 ```sh
-THREADS_USER_ID="12345678901234567"
-THREADS_ACCESS_TOKEN="THAAAAyyyyyyyyyyyyyyyy"
-
 # Twitter/X
-TWITTER_ACCESS_TOKEN="eyJhbGciOi..."
-TWITTER_REFRESH_TOKEN="dGVzdA..."
+TWITTER_POST_SECRET="seu_segredo_aqui"
 TWITTER_MAX_LEN=280
 ```
 
+Substitua `seu_segredo_aqui` pelo segredo fornecido pelo mantenedor do projeto ou configurado no seu próprio servidor Vercel.
+
 > **Usuários X Premium:** mude `TWITTER_MAX_LEN=280` para um valor maior (ex.: `TWITTER_MAX_LEN=4096`) para aproveitar o limite estendido de caracteres.
+
+> **Créditos de API:** o X Free tier exige créditos pagos para publicar via API. Se aparecer `"Twitter: credits depleted"` na tela do Kindle, os créditos no servidor estão esgotados. Verifique o arquivo `extensions/klipshare/cache/twitter_debug.txt` no Kindle para o detalhe completo do erro.
 
 ### Passo 4 — Criar o arquivo de configuração
 
@@ -278,6 +271,10 @@ Crie o arquivo `credentials.conf` dentro da pasta `extensions/klipshare/config/`
 ```sh
 THREADS_USER_ID="12345678901234567"
 THREADS_ACCESS_TOKEN="THAAAAyyyyyyyyyyyyyyyy"
+
+# Twitter/X (opcional — veja Passo 3.5)
+# TWITTER_POST_SECRET="seu_segredo_aqui"
+# TWITTER_MAX_LEN=280
 ```
 
 **Como criar o arquivo:**
@@ -341,9 +338,10 @@ via KlipShare for #Kindle
 | Arquivo salvo como `credentials.conf.txt` | Extensão duplicada no Windows | Ative a exibição de extensões no Explorer e renomeie removendo o `.txt` |
 | Página de setup mostra erro de autorização | Sessão do Threads expirada no navegador | Abra a página de setup no navegador onde você está logado no Threads |
 | Highlights do KOReader não aparecem | Nenhum highlight marcado ou KOReader não aberto após o destaque | Confirme que os destaques foram feitos com KOReader; reabra o KlipShare para atualizar a lista |
-| "Postado no Threads (Twitter: falhou)!" | Token do Twitter expirado ou inválido | Acesse `klipshare.vercel.app/setup/twitter` e gere novas credenciais |
+| "Twitter: credits depleted" na tela | X API sem créditos ativos no servidor | Adquira créditos em [developer.x.com](https://developer.x.com) ou aguarde o mantenedor recarregar |
+| "Twitter: Forbidden" na tela | `TWITTER_POST_SECRET` incorreto | Confirme o valor de `TWITTER_POST_SECRET` no `credentials.conf` |
 | Tweet com texto cortado | Destaque longo + limite de 280 chars | Normal — o Threads recebe o texto completo; ajuste `TWITTER_MAX_LEN` no `credentials.conf` se for X Premium |
-| Twitter não posta nada (Threads normal) | `TWITTER_ACCESS_TOKEN` ausente no `credentials.conf` | Configure o Twitter em `klipshare.vercel.app/setup/twitter` |
+| Twitter não posta nada (Threads normal) | `TWITTER_POST_SECRET` ausente no `credentials.conf` | Adicione as linhas do Twitter ao `credentials.conf` conforme o Passo 3.5 |
 
 ---
 
@@ -382,11 +380,13 @@ MIT — livre para uso pessoal e distribuição.
 
 **KlipShare** is a KUAL extension for jailbroken Kindles that reads highlights from `My Clippings.txt` (and KOReader) and posts them directly to [Threads](https://www.threads.net) with a single tap — no phone needed.
 
-**Features:** posts to Threads and Twitter/X simultaneously with one tap · independent truncation per platform (Threads 500 chars, Twitter 280 or more for X Premium) · on-screen feedback when tweet is shortened · automatic post formatting (`"quote" — Book\n\nvia KlipShare for #Kindle`) · smart capitalization (including accented characters) · character count indicator · offline queue · auto token refresh (Threads 60-day + Twitter rotating) · KOReader highlight support · delete highlight from menu · all highlights shown with no limit.
+**Features:** posts to Threads with one tap · optional simultaneous posting to Twitter/X · independent truncation per platform (Threads 500 chars, Twitter 280 or more for X Premium) · on-screen feedback when tweet is shortened · automatic post formatting (`"quote" — Book\n\nvia KlipShare for #Kindle`) · smart capitalization (including accented characters) · character count indicator · offline queue · auto token refresh (Threads 60-day) · KOReader highlight support · delete highlight from menu · all highlights shown with no limit.
 
-**Requirements:** jailbroken Kindle · KUAL 2.x · KOReader (provides `curl`) · Threads account · Twitter/X account (optional)
+**Requirements:** jailbroken Kindle · KUAL 2.x · KOReader (provides `curl`) · Threads account · Twitter/X account (optional, requires paid X API credits)
 
-**Setup:** download ZIP → copy `kindle/` folder to `extensions/klipshare/` on your Kindle → authorize at [klipshare.vercel.app/setup](https://klipshare.vercel.app/setup) (Threads) and optionally at [klipshare.vercel.app/setup/twitter](https://klipshare.vercel.app/setup/twitter) (Twitter/X) → paste the generated credentials into `credentials.conf` → done.
+**Setup:** download ZIP → copy `kindle/` folder to `extensions/klipshare/` on your Kindle → authorize at [klipshare.vercel.app/setup](https://klipshare.vercel.app/setup) (Threads) → paste the generated credentials into `credentials.conf` → done. Twitter/X is optional: add `TWITTER_POST_SECRET` to `credentials.conf` (see step 3.5).
+
+**Twitter/X note:** posting to X uses an OAuth 1.0a proxy server. The X Free tier requires purchased API credits to post. If credits are depleted, tweets will fail with `"credits depleted"` — check `extensions/klipshare/cache/twitter_debug.txt` on the Kindle for details.
 
 **Privacy:** KlipShare does not collect or transmit any personal data to its own servers. Network communication is limited to the official Threads (Meta) and Twitter/X APIs to publish posts authorized by the user. All tokens are stored locally on the device only.
 
