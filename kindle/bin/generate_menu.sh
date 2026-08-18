@@ -41,6 +41,7 @@ _ko_changed=false
 
 if [ ! -f "${CLIP_CACHE}" ] || [ "${CLIPS_FILE}" -nt "${CLIP_CACHE}" ] || [ "${_ko_changed}" = "true" ]; then
     feedback "Lendo clippings..."
+    _cache_tmp="${CLIP_CACHE}.tmp.$$"
     awk '
     BEGIN { state="title"; book=""; text=""; n=0 }
     /^==========/ {
@@ -65,13 +66,14 @@ if [ ! -f "${CLIP_CACHE}" ] || [ "${CLIPS_FILE}" -nt "${CLIP_CACHE}" ] || [ "${_
     state=="meta"  && /^- / { state="blank"; next }
     state=="blank"           { state="text"; next }
     state=="text"  && NF>0  { text=(text=="")?$0:text" "$0 }
-    ' "${CLIPS_FILE}" 2>/dev/null > "${CLIP_CACHE}"
+    ' "${CLIPS_FILE}" 2>/dev/null > "${_cache_tmp}"
 
     ## Adiciona todos os highlights do KOReader
-    mc_count=$(awk 'END{print NR}' "${CLIP_CACHE}" 2>/dev/null || echo 0)
-    KO_TMP="/tmp/klipshare_ko.txt"
+    mc_count=$(awk 'END{print NR}' "${_cache_tmp}" 2>/dev/null || echo 0)
+    KO_TMP="/tmp/klipshare_ko_$$.txt"
     : > "${KO_TMP}"
-    find /mnt/us/documents -name "metadata.*.lua" -type f 2>/dev/null > /tmp/klipshare_ko_list.txt
+    KO_LIST="/tmp/klipshare_ko_list_$$.txt"
+    find /mnt/us/documents -name "metadata.*.lua" -type f 2>/dev/null > "${KO_LIST}"
     while IFS= read -r lua_file; do
         sdr_dir=$(dirname "${lua_file}")
         book=$(basename "${sdr_dir}" .sdr)
@@ -102,15 +104,23 @@ if [ ! -f "${CLIP_CACHE}" ] || [ "${CLIPS_FILE}" -nt "${CLIP_CACHE}" ] || [ "${_
             hl=0; txt=""
         }
         ' "${lua_file}"
-    done < /tmp/klipshare_ko_list.txt >> "${KO_TMP}"
-    rm -f /tmp/klipshare_ko_list.txt
+    done < "${KO_LIST}" >> "${KO_TMP}"
+    rm -f "${KO_LIST}"
 
     if [ -s "${KO_TMP}" ]; then
         n="${mc_count}"
         awk -F'\t' -v start="${n}" \
-            '{print start+NR "\t" $1 "\t" $2}' "${KO_TMP}" >> "${CLIP_CACHE}"
+            '{print start+NR "\t" $1 "\t" $2}' "${KO_TMP}" >> "${_cache_tmp}"
     fi
     rm -f "${KO_TMP}"
+    mv "${_cache_tmp}" "${CLIP_CACHE}"
+    if [ -s "${EXCLUDED}" ]; then
+        awk -F'\t' '
+            NR==FNR { cache[$2"\t"$3]=1; next }
+            ($1"\t"$2 in cache)
+        ' "${CLIP_CACHE}" "${EXCLUDED}" > "${EXCLUDED}.tmp.$$" && \
+        mv "${EXCLUDED}.tmp.$$" "${EXCLUDED}"
+    fi
 fi
 
 ## Resolve arquivo de exclusao (fallback para /dev/null se vazio/ausente)
@@ -160,7 +170,7 @@ fi
 
 >>>>>>> b200a80 (fix: resolve KUAL dynamic menu bugs, token validation, and sync kindle binaries)
 ## Escreve menu.json e imprime para o KUAL (type="exec")
-_json=$(printf '{"items":[{"name":"KlipShare \xe2\x80\x94 Threads/X (%s clippings)","priority":0,"items":[%s]}]}' \
+_json=$(printf '{"items":[{"name":"KlipShare — Threads/X (%s clippings)","priority":0,"items":[%s]}]}' \
     "${total}" "${items}")
 printf '%s' "${_json}" > "${MENU_FILE}"
 printf '%s' "${_json}"

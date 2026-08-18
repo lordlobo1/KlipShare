@@ -98,10 +98,10 @@ fi
 label_pub=$(je "Publicar: \"$(printf '%s' "${text}" | awk -v n=38 '{printf substr($0,1,n)}')...\"")
 
 {
-    printf '{"items":[{"name":"KlipShare \xe2\x80\x94 Confirmar?","priority":0,"items":['
+    printf '{"items":[{"name":"KlipShare — Confirmar?","priority":0,"items":['
     printf '{"name":"%s","priority":1,"action":"./bin/share_threads.sh","params":"%s","exitmenu":false,"refresh":false,"status":false,"internal":"status Postando no Threads..."}' \
         "${label_pub}" "${CLIP_NUM}"
     printf ','
-    printf '{"name":"Cancelar \xe2\x80\x94 Voltar a lista","priority":2,"action":"./bin/generate_menu.sh","params":"--quiet","exitmenu":false,"refresh":false,"status":false,"internal":"status Restaurando lista..."}'
+    printf '{"name":"Cancelar — Voltar a lista","priority":2,"action":"./bin/generate_menu.sh","params":"--quiet","exitmenu":false,"refresh":false,"status":false,"internal":"status Restaurando lista..."}'
     printf ']}]}'
 } > "${MENU_FILE}"

@@ -6,7 +6,6 @@
 
 CLIP_NUM="$1"
 CLIP_CACHE="/mnt/us/extensions/klipshare/cache/clips.txt"
-CLIPS_FILE="/mnt/us/documents/My Clippings.txt"
 CREDS="/mnt/us/extensions/klipshare/config/credentials.conf"
 QUEUE_DIR="/mnt/us/extensions/klipshare/cache/queue"
 MAX_QUOTE_LEN=300
@@ -80,31 +79,8 @@ fi
 
 ## --- Recupera o clipping ---
 if [ ! -f "${CLIP_CACHE}" ]; then
-    awk '
-    BEGIN { state="title"; book=""; text=""; n=0 }
-    /^==========/ {
-        if (text != "") {
-            n++
-            gsub(/\r/,"",book); gsub(/\r/,"",text)
-            sub(/^\357\273\277/,"",book)
-            gsub(/[\360-\367][\200-\277][\200-\277][\200-\277]/,"",book)
-            gsub(/ \(z-library[^)]*\)/,"",book)
-            gsub(/ \(1lib[^)]*\)/,"",book)
-            gsub(/ \(z-lib[^)]*\)/,"",book)
-            while (book ~ / \([^)]*\).*\([^)]*\)/) sub(/ \([^)]*\)$/, "", book)
-            gsub(/\[[^\]]*\]/,"",book)
-            gsub(/[[:space:]]+/," ",book)
-            sub(/^[[:space:]]+/,"",book)
-            gsub(/[[:space:]]+$/,"",book)
-            print n "\t" book "\t" text
-        }
-        book=""; text=""; state="title"; next
-    }
-    state=="title" && NF>0  { book=$0; state="meta"; next }
-    state=="meta"  && /^- / { state="blank"; next }
-    state=="blank"           { state="text"; next }
-    state=="text"  && NF>0  { text=(text=="")?$0:text" "$0 }
-    ' "${CLIPS_FILE}" > "${CLIP_CACHE}" 2>/dev/null
+    feedback "ERRO: abra o menu KUAL primeiro para construir o cache."
+    exit 1
 fi
 
 line=$(awk -F'\t' -v n="${CLIP_NUM}" '$1==n {print; exit}' "${CLIP_CACHE}")
@@ -231,8 +207,12 @@ auto_refresh_token() {
 
 ## --- Auto-refresh do token Twitter (tokens rotativos) ---
 auto_refresh_twitter_token() {
+    _rt_body=$(printf '%s' "${TWITTER_REFRESH_TOKEN}" | \
+        awk '{gsub(/\\/, "\\\\"); gsub(/"/, "\\\""); printf "{\"token\":\"%s\"}", $0}')
     new_resp=$("${CURL}" -s --max-time 20 \
-        "https://klipshare.vercel.app/api/refresh_twitter?token=${TWITTER_REFRESH_TOKEN}" \
+        -X POST -H "Content-Type: application/json" \
+        -d "${_rt_body}" \
+        "https://klipshare.vercel.app/api/refresh_twitter" \
         2>/dev/null)
     new_at=$(printf '%s' "${new_resp}" | grep -o '"access_token":"[^"]*"' | sed 's/"access_token":"//;s/"//')
     new_rt=$(printf '%s' "${new_resp}" | grep -o '"refresh_token":"[^"]*"' | sed 's/"refresh_token":"//;s/"//')

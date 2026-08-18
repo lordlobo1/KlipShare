@@ -2,7 +2,7 @@ const CLIENT_ID     = process.env.TWITTER_CLIENT_ID;
 const CLIENT_SECRET = process.env.TWITTER_CLIENT_SECRET;
 
 module.exports = async function handler(req, res) {
-    const { token } = req.query;
+    const token = (req.body && req.body.token) || req.query.token;
 
     if (!token) {
         return res.status(400).json({ error: 'Parâmetro token ausente' });

@@ -5,6 +5,9 @@
 #
 
 CLIP_NUM="$1"
+case "${CLIP_NUM}" in
+    ''|*[!0-9]*) exit 1 ;;
+esac
 CLIP_CACHE="/mnt/us/extensions/klipshare/cache/clips.txt"
 EXCLUDED="/mnt/us/extensions/klipshare/cache/excluded.txt"
 
@@ -26,7 +29,10 @@ feedback() {
 }
 
 line=$(awk -F'\t' -v n="${CLIP_NUM}" '$1==n {print $2"\t"$3; exit}' "${CLIP_CACHE}")
-[ -z "${line}" ] && exit 1
+if [ -z "${line}" ]; then
+    feedback "ERRO: clipping nao encontrado"
+    exit 1
+fi
 
 mkdir -p "$(dirname "${EXCLUDED}")"
 printf '%s\n' "${line}" >> "${EXCLUDED}"

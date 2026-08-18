@@ -58,6 +58,10 @@ module.exports = async function handler(req, res) {
     }
 };
 
+function escHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function renderPage(state, data) {
     const credBlock = state === 'success'
         ? `TWITTER_ACCESS_TOKEN="${data.access_token}"\nTWITTER_REFRESH_TOKEN="${data.refresh_token}"\nTWITTER_MAX_LEN=280`
@@ -123,7 +127,7 @@ ${state === 'success' ? `
     </p>
   </div>
 ` : `
-  <div class="error-box">Erro ao autorizar: ${data.message || 'desconhecido'}</div>
+  <div class="error-box">Erro ao autorizar: ${escHtml(data.message || 'desconhecido')}</div>
   <a href="/setup/twitter" style="display:block;text-align:center;color:#888;font-size:14px;">Tentar novamente</a>
 `}
 </div>
