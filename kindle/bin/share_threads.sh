@@ -35,7 +35,7 @@ if [ ! -f "${CREDS}" ]; then
     exit 1
 fi
 
-. "${CREDS}"
+eval "$(tr -d '\r' < "${CREDS}")"
 
 # Remove espaços acidentais nas extremidades
 THREADS_USER_ID=$(printf '%s' "${THREADS_USER_ID}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
@@ -59,7 +59,7 @@ if [ -z "${THREADS_ACCESS_TOKEN}" ] || [ "${THREADS_ACCESS_TOKEN}" = "SEU_ACCESS
 fi
 
 case "${THREADS_ACCESS_TOKEN}" in
-    THAA*) ;;
+    TH*) ;;
     *) feedback "ERRO: THREADS_ACCESS_TOKEN invalido. Gere um novo em klipshare.vercel.app/setup"; exit 1 ;;
 esac
 
@@ -169,7 +169,7 @@ post_to_threads() {
         -H "Authorization: Bearer ${THREADS_ACCESS_TOKEN}" \
         --data-urlencode "media_type=TEXT" \
         --data-urlencode "text=${_pt}" 2>/dev/null)
-    _cid=$(printf '%s' "${_r}" | grep -o '"id":"[^"]*"' | head -1 | sed 's/"id":"//;s/"//')
+    _cid=$(printf '%s' "${_r}" | grep -o '"id"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed 's/.*"id"[[:space:]]*:[[:space:]]*"//;s/"//')
     [ -z "${_cid}" ] && return 1
     sleep 1
     _pub=$("${CURL}" -s --max-time 30 -X POST \

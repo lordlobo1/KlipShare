@@ -97,10 +97,10 @@ O arquivo extraído terá esta estrutura:
 KlipShare-main/
 ├── kindle/       ← pasta que vai para o Kindle
 │   ├── bin/
-│   │   ├── generate_menu.sh
-│   │   ├── share_threads.sh
 │   │   ├── delete_clip.sh
-│   │   └── preview_clip.sh
+│   │   ├── generate_menu.sh
+│   │   ├── preview_clip.sh
+│   │   └── share_threads.sh
 │   └── config.xml
 ├── api/          ← servidor (ignorar)
 ├── setup/        ← servidor (ignorar)
@@ -125,10 +125,9 @@ Kindle/
     └── klipshare/
         ├── config.xml
         ├── bin/
-        │   ├── generate_menu.sh
-        │   ├── share_threads.sh
         │   ├── delete_clip.sh
-        │   └── preview_clip.sh
+        │   ├── preview_clip.sh
+        │   └── share_threads.sh
         └── config/               ← criar esta pasta manualmente
             └── credentials.conf  ← criado no Passo 4
 ```

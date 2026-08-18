@@ -5,11 +5,11 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'Parâmetro code ausente' });
     }
 
-    const APP_ID     = process.env.THREADS_APP_ID;
+    const APP_ID     = process.env.THREADS_APP_ID || '1817010732620817';
     const APP_SECRET = process.env.THREADS_APP_SECRET;
-    const REDIRECT   = process.env.REDIRECT_URI;
+    const REDIRECT   = process.env.REDIRECT_URI || redirect_uri || 'https://klipshare.vercel.app/setup';
 
-    if (redirect_uri && redirect_uri !== REDIRECT) {
+    if (redirect_uri && process.env.REDIRECT_URI && redirect_uri !== process.env.REDIRECT_URI) {
         return res.status(400).json({ error: 'redirect_uri não autorizado' });
     }
 

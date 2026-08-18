@@ -82,18 +82,23 @@ if [ ! -f "${CLIP_CACHE}" ] || [ "${CLIPS_FILE}" -nt "${CLIP_CACHE}" ] || [ "${_
         BEGIN { hl=0; txt="" }
         /\["highlighted"\] *= *true/    { hl=1 }
         /\["type"\] *= *"highlight"/    { hl=1 }
-        /\["notes"\] *= *"/ {
-            txt=$0
-            sub(/^.*\["notes"\] *= *"/, "", txt)
-            sub(/"[[:space:]]*,?[[:space:]]*$/, "", txt)
-        }
         /\["text"\] *= *"/ {
-            txt=$0
-            sub(/^.*\["text"\] *= *"/, "", txt)
-            sub(/"[[:space:]]*,?[[:space:]]*$/, "", txt)
+            t=$0
+            sub(/^.*\["text"\] *= *"/, "", t)
+            sub(/"[[:space:]]*,?[[:space:]]*$/, "", t)
+            if (t != "") txt=t
+        }
+        /\["notes"\] *= *"/ {
+            t=$0
+            sub(/^.*\["notes"\] *= *"/, "", t)
+            sub(/"[[:space:]]*,?[[:space:]]*$/, "", t)
+            if (txt == "" && t != "") txt=t
         }
         /^[[:space:]]*\},?[[:space:]]*$/ {
-            if (hl && length(txt)>5) print book "\t" txt
+            if (hl && length(txt)>5) {
+                gsub(/\t/, " ", txt)
+                print book "\t" txt
+            }
             hl=0; txt=""
         }
         ' "${lua_file}"
@@ -128,6 +133,7 @@ BEGIN {
 function jesc(s) {
     gsub(/\\/, "\\\\", s); gsub(/"/, "\\\"", s)
     gsub(/\t/, " ", s);    gsub(/\r/, "", s)
+    gsub(/\n/, " ", s)
     return s
 }
 {
@@ -142,6 +148,17 @@ function jesc(s) {
 }
 ' "${CLIP_CACHE}")
 
+<<<<<<< HEAD
+=======
+## Adiciona item de acao "Atualizar lista" ao final
+refresh_item='{"name":"Atualizar lista","priority":999,"action":"./bin/generate_menu.sh","exitmenu":false,"refresh":true,"status":false,"internal":"status Atualizando clippings..."}'
+if [ -n "${items}" ]; then
+    items="${items},${refresh_item}"
+else
+    items="${refresh_item}"
+fi
+
+>>>>>>> b200a80 (fix: resolve KUAL dynamic menu bugs, token validation, and sync kindle binaries)
 ## Escreve menu.json e imprime para o KUAL (type="exec")
 _json=$(printf '{"items":[{"name":"KlipShare \xe2\x80\x94 Threads/X (%s clippings)","priority":0,"items":[%s]}]}' \
     "${total}" "${items}")
