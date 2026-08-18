@@ -39,8 +39,7 @@ eval "$(tr -d '\r' < "${CREDS}")"
 # Remove espaços acidentais nas extremidades
 THREADS_USER_ID=$(printf '%s' "${THREADS_USER_ID}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 THREADS_ACCESS_TOKEN=$(printf '%s' "${THREADS_ACCESS_TOKEN}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-TWITTER_ACCESS_TOKEN=$(printf '%s' "${TWITTER_ACCESS_TOKEN:-}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-TWITTER_REFRESH_TOKEN=$(printf '%s' "${TWITTER_REFRESH_TOKEN:-}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+TWITTER_POST_SECRET=$(printf '%s' "${TWITTER_POST_SECRET:-}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 TWITTER_MAX_LEN="${TWITTER_MAX_LEN:-280}"
 
 if [ -z "${THREADS_USER_ID}" ] || [ "${THREADS_USER_ID}" = "SEU_USER_ID_AQUI" ]; then
@@ -157,23 +156,25 @@ post_to_threads() {
 
 post_to_twitter() {
     _tw_body=$(printf '"%s"\n\n— %s\n\nvia KlipShare for #Kindle' "${tw_text}" "${book}")
-    _tw_json=$(printf '%s' "${_tw_body}" | awk '
-        BEGIN { printf "{\"text\":\"" }
-        { gsub(/\\/, "\\\\"); gsub(/"/, "\\\""); if (NR > 1) printf "\\n"; printf "%s", $0 }
-        END { printf "\"}" }
+    _tw_text_esc=$(printf '%s' "${_tw_body}" | awk '
+        BEGIN { r="" }
+        { gsub(/\\/, "\\\\"); gsub(/"/, "\\\""); if (NR > 1) r=r "\\n"; r=r $0 }
+        END { printf "%s", r }
     ')
+    _sec_esc=$(printf '%s' "${TWITTER_POST_SECRET}" | sed 's/\\/\\\\/g; s/"/\\"/g')
+    _tw_json=$(printf '{"text":"%s","secret":"%s"}' "${_tw_text_esc}" "${_sec_esc}")
     _r=$("${CURL}" -s --max-time 30 -X POST \
-        "https://api.twitter.com/2/tweets" \
-        -H "Authorization: Bearer ${TWITTER_ACCESS_TOKEN}" \
+        "https://klipshare.vercel.app/api/post_twitter" \
         -H "Content-Type: application/json" \
-        -d "${_tw_json}" 2>/dev/null)
+        -d "${_tw_json}" 2>&1)
     printf '%s\n' "${_r}" > /mnt/us/extensions/klipshare/cache/twitter_debug.txt
     printf '%s' "${_r}" | grep -q '"id"' && return 0
-    if printf '%s' "${_r}" | grep -q '"status": *401'; then return 2; fi
-    if printf '%s' "${_r}" | grep -q '"code": *89'; then return 2; fi
-    _TW_ERR=$(printf '%s' "${_r}" | grep -o '"detail":"[^"]*"' | head -1 | sed 's/"detail":"//;s/"$//')
-    [ -z "${_TW_ERR}" ] && _TW_ERR=$(printf '%s' "${_r}" | grep -o '"message":"[^"]*"' | head -1 \
-        | sed 's/"message":"//;s/"$//')
+    _TW_ERR=$(printf '%s' "${_r}" | grep -o '"detail": *"[^"]*"' | head -1 \
+        | sed 's/"detail": *"//;s/"$//')
+    [ -z "${_TW_ERR}" ] && _TW_ERR=$(printf '%s' "${_r}" | grep -o '"message": *"[^"]*"' | head -1 \
+        | sed 's/"message": *"//;s/"$//')
+    [ -z "${_TW_ERR}" ] && _TW_ERR=$(printf '%s' "${_r}" | grep -o '"error": *"[^"]*"' | head -1 \
+        | sed 's/"error": *"//;s/"$//')
     [ -z "${_TW_ERR}" ] && _TW_ERR="sem detalhe"
     return 1
 }
@@ -210,32 +211,6 @@ auto_refresh_token() {
     fi
 }
 
-## --- Auto-refresh do token Twitter (tokens rotativos) ---
-auto_refresh_twitter_token() {
-    _rt_body=$(printf '%s' "${TWITTER_REFRESH_TOKEN}" | \
-        awk '{gsub(/\\/, "\\\\"); gsub(/"/, "\\\""); printf "{\"token\":\"%s\"}", $0}')
-    new_resp=$("${CURL}" -s --max-time 20 \
-        -X POST -H "Content-Type: application/json" \
-        -d "${_rt_body}" \
-        "https://klipshare.vercel.app/api/refresh_twitter" \
-        2>/dev/null)
-    new_at=$(printf '%s' "${new_resp}" | grep -o '"access_token":"[^"]*"' | sed 's/"access_token":"//;s/"//')
-    new_rt=$(printf '%s' "${new_resp}" | grep -o '"refresh_token":"[^"]*"' | sed 's/"refresh_token":"//;s/"//')
-    if [ -n "${new_at}" ] && [ -n "${new_rt}" ]; then
-        tmp="${CREDS}.tmp"
-        if grep -v "^TWITTER_ACCESS_TOKEN=" "${CREDS}" | \
-           grep -v "^TWITTER_REFRESH_TOKEN=" > "${tmp}" && \
-           printf 'TWITTER_ACCESS_TOKEN="%s"\n' "${new_at}" >> "${tmp}" && \
-           printf 'TWITTER_REFRESH_TOKEN="%s"\n' "${new_rt}" >> "${tmp}" && \
-           mv "${tmp}" "${CREDS}"; then
-            TWITTER_ACCESS_TOKEN="${new_at}"
-            TWITTER_REFRESH_TOKEN="${new_rt}"
-        else
-            rm -f "${tmp}"
-        fi
-    fi
-}
-
 ## --- Verifica WiFi ---
 if ! wifi_ok; then
     mkdir -p "${QUEUE_DIR}"
@@ -252,16 +227,10 @@ feedback "Criando post..."
 if post_to_threads "${post_text}"; then
     ## --- Posta no Twitter se configurado ---
     tw_suffix=""
-    if [ -n "${TWITTER_ACCESS_TOKEN}" ] && [ -n "${TWITTER_REFRESH_TOKEN}" ]; then
+    if [ -n "${TWITTER_POST_SECRET}" ]; then
         _TW_ERR=""
         post_to_twitter
         tw_result=$?
-        if [ "${tw_result}" -eq 2 ]; then
-            _TW_ERR=""
-            auto_refresh_twitter_token
-            post_to_twitter
-            tw_result=$?
-        fi
         if [ "${tw_result}" -eq 0 ]; then
             [ "${tw_truncated}" = "true" ] \
                 && tw_suffix=" + Twitter (encurtado)" \
