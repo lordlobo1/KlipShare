@@ -35,14 +35,14 @@ KlipShare é uma extensão para o [KUAL](https://www.mobileread.com/forums/showt
 - **Threads + Twitter/X simultâneos** — um toque posta nas duas plataformas ao mesmo tempo (Twitter é opcional)
 - **Truncamento independente por plataforma** — Threads usa até 500 chars; Twitter usa até 280 (ou mais, para usuários X Premium)
 - **Feedback diferenciado** — a tela do Kindle avisa quando o tweet foi encurtado para caber no limite
-- **Formatação automática** — o post é gerado no formato `"trecho" — Livro #kindle #leitura`
+- **Formatação automática** — o post é gerado no formato `"trecho" — Livro\n\nvia KlipShare for #Kindle`
 - **Limpeza de títulos** — remove metadados de e-books (z-library, [PDF], emojis, parênteses duplicados)
 - **Capitalização inteligente** — capitaliza a primeira letra, incluindo caracteres acentuados (á, é, ó...)
 - **Indicador de caracteres** — exibe o tamanho estimado do post antes de publicar
 - **Fila offline** — se o Kindle estiver sem WiFi, o post é salvo e enviado automaticamente na próxima conexão
 - **Token persistente** — renovação automática dos tokens do Threads (60 dias) e Twitter/X (rotativo)
 - **Suporte ao KOReader** — lê highlights do KOReader além do `My Clippings.txt` nativo
-- **Até 30 destaques recentes** exibidos no menu
+- **Todos os destaques disponíveis** exibidos no menu, sem limite
 
 ---
 
@@ -98,7 +98,9 @@ KlipShare-main/
 ├── kindle/       ← pasta que vai para o Kindle
 │   ├── bin/
 │   │   ├── generate_menu.sh
-│   │   └── share_threads.sh
+│   │   ├── share_threads.sh
+│   │   ├── delete_clip.sh
+│   │   └── preview_clip.sh
 │   └── config.xml
 ├── api/          ← servidor (ignorar)
 ├── setup/        ← servidor (ignorar)
@@ -124,7 +126,9 @@ Kindle/
         ├── config.xml
         ├── bin/
         │   ├── generate_menu.sh
-        │   └── share_threads.sh
+        │   ├── share_threads.sh
+        │   ├── delete_clip.sh
+        │   └── preview_clip.sh
         └── config/               ← criar esta pasta manualmente
             └── credentials.conf  ← criado no Passo 4
 ```
@@ -292,15 +296,14 @@ THREADS_ACCESS_TOKEN="THAAAAyyyyyyyyyyyyyyyy"
    - **Windows:** clique no ícone de ejetar na barra de tarefas → selecione o Kindle
    - **Mac:** arraste o ícone do Kindle para a lixeira ou clique no ⏏ ao lado do nome no Finder
 2. Na tela inicial do Kindle, abra o **KUAL**
-3. Selecione **KlipShare**
-4. Clique em **Atualizar lista** e aguarde a mensagem de confirmação na tela
-5. Seus destaques aparecerão no menu com o tamanho estimado do post entre colchetes:
+3. Selecione **KlipShare (Threads/X)**
+4. Seus destaques aparecerão automaticamente no menu com o tamanho estimado do post entre colchetes:
    ```
    [142] Assim como a planta brota...
    [89] Servir de modelo e de inspi...
    ```
-6. Toque em qualquer destaque — ele será publicado automaticamente no Threads
-7. Uma mensagem na tela do Kindle confirmará o envio
+5. Toque em qualquer destaque para abrir o submenu e escolha **Publicar**
+6. Uma mensagem na tela do Kindle confirmará o envio
 
 ---
 
@@ -335,10 +338,10 @@ via KlipShare for #Kindle
 | "ERRO: curl nao encontrado" | KOReader não instalado | Instale o KOReader — ele fornece o `curl` usado pela extensão |
 | "FALHA ao publicar. Tente novamente." | Token inválido ou expirado | Repita o Passo 3 na página de setup para gerar um novo token |
 | "Sem WiFi. Post salvo na fila offline." | Kindle sem conexão WiFi | Normal — o post será enviado automaticamente quando o WiFi reconectar |
-| Lista de destaques vazia | Nenhum destaque no `My Clippings.txt` | Faça ao menos um destaque em um livro e clique em "Atualizar lista" |
+| Lista de destaques vazia | Nenhum destaque no `My Clippings.txt` | Faça ao menos um destaque em um livro e reabra o KlipShare |
 | Arquivo salvo como `credentials.conf.txt` | Extensão duplicada no Windows | Ative a exibição de extensões no Explorer e renomeie removendo o `.txt` |
 | Página de setup mostra erro de autorização | Sessão do Threads expirada no navegador | Abra a página de setup no navegador onde você está logado no Threads |
-| Highlights do KOReader não aparecem | Nenhum highlight marcado ou path incorreto | Confirme que os destaques foram feitos com KOReader e clique em "Atualizar lista" |
+| Highlights do KOReader não aparecem | Nenhum highlight marcado ou KOReader não aberto após o destaque | Confirme que os destaques foram feitos com KOReader; reabra o KlipShare para atualizar a lista |
 | "Postado no Threads (Twitter: falhou)!" | Token do Twitter expirado ou inválido | Acesse `klipshare.vercel.app/setup/twitter` e gere novas credenciais |
 | Tweet com texto cortado | Destaque longo + limite de 280 chars | Normal — o Threads recebe o texto completo; ajuste `TWITTER_MAX_LEN` no `credentials.conf` se for X Premium |
 | Twitter não posta nada (Threads normal) | `TWITTER_ACCESS_TOKEN` ausente no `credentials.conf` | Configure o Twitter em `klipshare.vercel.app/setup/twitter` |
@@ -380,7 +383,7 @@ MIT — livre para uso pessoal e distribuição.
 
 **KlipShare** is a KUAL extension for jailbroken Kindles that reads highlights from `My Clippings.txt` (and KOReader) and posts them directly to [Threads](https://www.threads.net) with a single tap — no phone needed.
 
-**Features:** posts to Threads and Twitter/X simultaneously with one tap · independent truncation per platform (Threads 500 chars, Twitter 280 or more for X Premium) · on-screen feedback when tweet is shortened · automatic post formatting (`"quote" — Book #kindle`) · smart capitalization (including accented characters) · character count indicator · offline queue · auto token refresh (Threads 60-day + Twitter rotating) · KOReader highlight support · up to 30 recent highlights in the menu.
+**Features:** posts to Threads and Twitter/X simultaneously with one tap · independent truncation per platform (Threads 500 chars, Twitter 280 or more for X Premium) · on-screen feedback when tweet is shortened · automatic post formatting (`"quote" — Book\n\nvia KlipShare for #Kindle`) · smart capitalization (including accented characters) · character count indicator · offline queue · auto token refresh (Threads 60-day + Twitter rotating) · KOReader highlight support · delete highlight from menu · all highlights shown with no limit.
 
 **Requirements:** jailbroken Kindle · KUAL 2.x · KOReader (provides `curl`) · Threads account · Twitter/X account (optional)
 
