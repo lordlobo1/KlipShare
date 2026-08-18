@@ -169,8 +169,8 @@ post_to_twitter() {
         -d "${_tw_json}" 2>/dev/null)
     printf '%s\n' "${_r}" > /mnt/us/extensions/klipshare/cache/twitter_debug.txt
     printf '%s' "${_r}" | grep -q '"id"' && return 0
-    if printf '%s' "${_r}" | grep -q '"status":401'; then return 2; fi
-    if printf '%s' "${_r}" | grep -q '"code":89'; then return 2; fi
+    if printf '%s' "${_r}" | grep -q '"status": *401'; then return 2; fi
+    if printf '%s' "${_r}" | grep -q '"code": *89'; then return 2; fi
     _TW_ERR=$(printf '%s' "${_r}" | grep -o '"detail":"[^"]*"' | head -1 | sed 's/"detail":"//;s/"$//')
     [ -z "${_TW_ERR}" ] && _TW_ERR=$(printf '%s' "${_r}" | grep -o '"message":"[^"]*"' | head -1 \
         | sed 's/"message":"//;s/"$//')
