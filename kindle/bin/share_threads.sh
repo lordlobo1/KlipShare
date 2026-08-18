@@ -167,14 +167,14 @@ post_to_twitter() {
         -H "Authorization: Bearer ${TWITTER_ACCESS_TOKEN}" \
         -H "Content-Type: application/json" \
         -d "${_tw_json}" 2>/dev/null)
+    printf '%s\n' "${_r}" > /mnt/us/extensions/klipshare/cache/twitter_debug.txt
     printf '%s' "${_r}" | grep -q '"id"' && return 0
     if printf '%s' "${_r}" | grep -q '"status":401'; then return 2; fi
     if printf '%s' "${_r}" | grep -q '"code":89'; then return 2; fi
-    _tw_err=$(printf '%s' "${_r}" | grep -o '"detail":"[^"]*"\|"message":"[^"]*"' | head -1 \
-        | sed 's/^"[^"]*":"//;s/"$//')
-    [ -n "${_tw_err}" ] \
-        && feedback "Twitter: ${_tw_err}" \
-        || feedback "Twitter: falha (sem detalhe na resposta)"
+    _TW_ERR=$(printf '%s' "${_r}" | grep -o '"detail":"[^"]*"' | head -1 | sed 's/"detail":"//;s/"$//')
+    [ -z "${_TW_ERR}" ] && _TW_ERR=$(printf '%s' "${_r}" | grep -o '"message":"[^"]*"' | head -1 \
+        | sed 's/"message":"//;s/"$//')
+    [ -z "${_TW_ERR}" ] && _TW_ERR="sem detalhe"
     return 1
 }
 
@@ -253,9 +253,11 @@ if post_to_threads "${post_text}"; then
     ## --- Posta no Twitter se configurado ---
     tw_suffix=""
     if [ -n "${TWITTER_ACCESS_TOKEN}" ] && [ -n "${TWITTER_REFRESH_TOKEN}" ]; then
+        _TW_ERR=""
         post_to_twitter
         tw_result=$?
         if [ "${tw_result}" -eq 2 ]; then
+            _TW_ERR=""
             auto_refresh_twitter_token
             post_to_twitter
             tw_result=$?
@@ -265,7 +267,7 @@ if post_to_threads "${post_text}"; then
                 && tw_suffix=" + Twitter (encurtado)" \
                 || tw_suffix=" + Twitter"
         else
-            tw_suffix=" (Twitter: falhou)"
+            tw_suffix=" (Twitter: $(printf '%s' "${_TW_ERR}" | awk -v n=25 '{printf substr($0,1,n)}'))"
         fi
     fi
     feedback "Postado no Threads${tw_suffix}!"
