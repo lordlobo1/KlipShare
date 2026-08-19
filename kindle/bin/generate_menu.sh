@@ -133,12 +133,11 @@ total=$(awk -F'\t' -v ef="${_ef}" '
     END { print c+0 }
 ' "${CLIP_CACHE}" 2>/dev/null || echo 0)
 
-## Constroi itens JSON com submenu Publicar / Deletar por destaque
+## Constroi itens JSON com submenu Publicar / Deletar por destaque (mais novos primeiro)
 items=$(awk -F'\t' -v ml="${MAX_LABEL}" -v ef="${_ef}" '
 BEGIN {
     while ((getline l < ef) > 0) ex[l] = 1
     close(ef)
-    first = 1
 }
 function jesc(s) {
     gsub(/\\/, "\\\\", s); gsub(/"/, "\\\"", s)
@@ -146,15 +145,20 @@ function jesc(s) {
     gsub(/\n/, " ", s)
     return s
 }
-{
-    if (($2 "\t" $3) in ex) next
-    pl = length($3) + length($2) + 35
-    lb = (length($3) > ml) ? substr($3,1,ml) "..." : $3
-    pub = sprintf("{\"name\":\"Publicar\",\"priority\":1,\"action\":\"./bin/share_threads.sh\",\"params\":\"%s\",\"exitmenu\":false,\"refresh\":false,\"status\":false,\"internal\":\"status Postando no Threads...\"}", $1)
-    del = sprintf("{\"name\":\"Deletar destaque\",\"priority\":2,\"action\":\"./bin/delete_clip.sh\",\"params\":\"%s\",\"exitmenu\":false,\"refresh\":true,\"status\":false,\"internal\":\"status Removendo...\"}", $1)
-    if (!first) printf ","
-    first = 0
-    printf "{\"name\":\"%s\",\"priority\":%s,\"items\":[%s,%s]}", jesc("[" pl "] " lb), $1, pub, del
+{ f1[NR]=$1; f2[NR]=$2; f3[NR]=$3 }
+END {
+    first = 1; pri = 0
+    for (i = NR; i >= 1; i--) {
+        if ((f2[i] "\t" f3[i]) in ex) continue
+        pri++
+        pl = length(f3[i]) + length(f2[i]) + 35
+        lb = (length(f3[i]) > ml) ? substr(f3[i],1,ml) "..." : f3[i]
+        pub = sprintf("{\"name\":\"Publicar\",\"priority\":1,\"action\":\"./bin/share_threads.sh\",\"params\":\"%s\",\"exitmenu\":false,\"refresh\":false,\"status\":false,\"internal\":\"status Postando no Threads...\"}", f1[i])
+        del = sprintf("{\"name\":\"Deletar destaque\",\"priority\":2,\"action\":\"./bin/delete_clip.sh\",\"params\":\"%s\",\"exitmenu\":false,\"refresh\":true,\"status\":false,\"internal\":\"status Removendo...\"}", f1[i])
+        if (!first) printf ","
+        first = 0
+        printf "{\"name\":\"%s\",\"priority\":%s,\"items\":[%s,%s]}", jesc("[" pl "] " lb), pri, pub, del
+    }
 }
 ' "${CLIP_CACHE}")
 
